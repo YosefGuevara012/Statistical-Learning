@@ -346,13 +346,27 @@ Comment on the range of each predictor.
 ```{r}
 sapply(Boston[,-14],range)
 ```
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+1.  crim: Vemos que la tasa de crimeness en todo Boston no supera el **90%**, y en algunos casos en cercana a **0%**, tambien se aprecia como el **96%** de los suburbios de Boston, posee una tasa inferior al **20%** de criminalidad.
+2.  zn: Se aprecia que existen areas de de Boston que no poseen zonas residenciales por cada 25000 sq.ft, mientras otras se encuentran completamente llenas de areas residenciales siendo estas apenas el **2%**.
+3.  indus: El rango nos muestra que el grado de areas industriales máximo por cada Acre en bostón es apenas el **28%**. No obstante el **32%** de estas areas esta industrializadas en alrededor del **18%**.
+4.  chas: Esta en una variable logica donde se representa que si los distritos de boston conectan con el rio Charles vemos que apenas el **7%** de ellos no lo hacen.
+5.  nox: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+6.  rm: Vemos que el numero de habitantes por vivienda se encentra entre el 3 a 9 personas, de las cuales el **84%** se encuentran habitadas entre 5 a 7 personas por vivienda.
+7.  age: Se aprecia que la proporcion de viviendas ocupadas por distrito que fueron construidas antes del 1940, se encuentra entre el **2** y el **100**, lo que parece ser un indicativo que grandes areas de la ciudad poseen edificios activos con más de 80 años de antiguedad para la fecha actual.
+8.  dis: Se puede observar que la media de la distancia a los centro de empleo no supera los 12 km, con lo cual se puede decir que Boston es un a ciudad relativamente pequeña.
+9.  rad: Se aprecia que el indice de accesibilidad a autopistas radiales es va desde **0** a **24**, de los cuales el **74%** tiene un indice inferior a **10**.
+10. tax: Se evidencia que para ningun distrito la tas de impuesto por inmueble por cada **$1000 USD** es inferior a **$187 USD** y que en solo el **27%** de los suburbios es superior a **$600 USD**.
+11. ptratio: Es claro que la tasa de profesores por alumno, no supera **22** alumnos por profesor es decir que se puede decir que en el peor de los casos los salones apenas superan la mitad de los estudiantes maximos por profesor en Bogotá.
+12. black: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+13. lstat: % lower status of the population
+
+
 
 (e) How many of the suburbs in this data set bound the Charles
 river?
 
-La cantidad de suburbios en Bostosn que limitan con el rio charles son:
+La cantidad de suburbios en Boston que limitan con el río charles son:
 
 ```{r}
 sum(Boston$chas == 1)
