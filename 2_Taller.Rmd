@@ -37,7 +37,8 @@ we still need to eliminate the first column in the data where the
 names are stored. Try
 
 ```{r}
-college =college [,-1:-2]
+rownames =college[, 1]
+college =college [,-1]
 fix (college )
 ```
 
@@ -51,6 +52,7 @@ of the variables in the data set.
 
 
 ```{r}
+college$Private <- as.factor(college$Private)
 summary(college)
 ```
 ii. Use the pairs() function to produce a scatterplot matrix of
@@ -59,8 +61,300 @@ you can reference the first ten columns of a matrix A using
 A[,1:10].
 
 ```{r}
-pairs(college)
+pairs(college[,1:10])
 ```
+iii. Use the plot() function to produce side-by-side boxplots of
+Outstate versus Private.
+
+
 ```{r}
-knitr::include_graphics("1.PNG")
+
+plot(college$Private,college$Outstate, main= "Out-of-state tuition", ylab= "Outstate", xlab= "Private")
 ```
+
+Create a new qualitative variable, called **Elite**, by binning the Top10perc variable. We are going to divide universities into two groups based on whether or not the proportion of students coming from the top 10% of their high school
+classes exceeds 50%.
+```{r}
+
+Elite =rep ("No",nrow(college ))
+Elite [college$Top10perc >50]=" Yes"
+Elite =as.factor (Elite)
+college =data.frame(college ,Elite)
+
+```
+
+Use the summary() function to see how many elite universities there are.
+
+```{r}
+summary(college$Elite)
+```
+Now use the plot() function to produce
+side-by-side boxplots of Outstate versus Elite.
+
+```{r}
+plot(college$Elite,college$Outstate, main= "Out-of-state tuition", ylab= "Outstate", xlab= "Elite")
+```
+
+v. Use the hist() function to produce some histograms with differing numbers of bins for a few of the quantitative variables. You may find the command par(mfrow=c(2,2)) useful:
+it will divide the print window into four regions so that four plots can be made simultaneously. Modifying the arguments
+to this function will divide the screen in other ways.
+
+
+```{r}
+par(mfrow=c(2,2))
+hist(college$Accept, main = "Accepted", breaks = 12, xlab = "Number of applicants accepted")
+hist(college$Enroll, main = "Enroll", breaks = 8, xlab = "Number of new students enrolled")
+hist(college$F.Undergrad, main = "F.Undergrad", breaks = 15, xlab = "Number of full-time undergraduates")
+hist(college$Outstate, main = "Outstate", breaks = 10, xlab = "Out-of-state tuition")
+
+```
+vi. Continue exploring the data, and provide a brief summary
+of what you discover.
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+9. This exercise involves the Auto data set studied in the lab. Make sure
+that the missing values have been removed from the data.
+
+```{r}
+library(ISLR)
+data(Auto)
+str(Auto)
+```
+
+(a) Which of the predictors are quantitative, and which are qualitative?
+
+Gracias al comando **str()**, podemos ver que todas las variables con excepción de **name** son variables cuantitativas y por ende **name** es un predictor cuantitativo 
+
+(b) What is the range of each quantitative predictor? You can answer
+this using the **summary()** function.
+
+```{r}
+sapply(Auto[ ,(1:8)], range)
+```
+
+(c) What is the mean and standard deviation of each quantitative
+predictor?
+
+La media de cada variable predictora esta dada por:
+
+```{r}
+sapply(Auto[ ,-9], mean)
+```
+La desviación estándar de cada variable predictora esta dada por:
+
+```{r}
+sapply(Auto[ ,-9], sd)
+```
+
+
+(d) Now remove the 10th through 85th observations. What is the
+range, mean, and standard deviation of each predictor in the
+subset of the data that remains?
+
+```{r}
+# Se ejecuta el subset de los datos
+
+Auto_subset <- subset(Auto[-10:-85,-9])
+```
+
+El rango de dado para los datos restantes es:
+
+```{r}
+
+sapply(Auto_subset,range)
+
+```
+
+La media para los datos restantes es:
+
+```{r}
+
+sapply(Auto_subset,mean)
+
+```
+
+La desviación estándar para los datos restantes es:
+
+```{r}
+
+sapply(Auto_subset,sd)
+
+```
+
+
+(e) Using the full data set, investigate the predictors graphically,
+using scatterplots or other tools of your choice. Create some plots
+highlighting the relationships among the predictors. Comment
+on your findings.
+
+```{r}
+pairs(Auto[,-9])
+```
+
+```{r}
+par(mfrow=c(2,2))
+hist(Auto$mpg, main = "MPG", xlab = "miles per gallon")
+hist(Auto$horsepower, main = "Horsepower", breaks = 8, xlab = "Engine horsepower")
+hist(Auto$weight, main = "Weight", breaks = 15, xlab = "Vehicle weight (lbs.)")
+hist(Auto$acceleration, main = "Acceleration", breaks = 10, xlab = "Time to accelerate from 0 to 60 mph (sec.)")
+
+```
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+(f) Suppose that we wish to predict gas mileage (mpg) on the basis
+of the other variables. Do your plots suggest that any of the
+other variables might be useful in predicting mpg? Justify your
+answer.
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+displacement, horsepower and weight
+
+
+10. This exercise involves the Boston housing data set.
+
+(a) To begin, load in the Boston data set. The Boston data set is
+part of the MASS library in R.
+
+
+```{r}
+library(MASS)
+data(Boston)
+str(Boston)
+```
+
+
+How many rows are in this data set? 
+
+```{r}
+nrow(Boston)
+```
+
+
+How many columns? 
+
+```{r}
+ncol(Boston)
+```
+
+
+Whatdo the rows and columns represent?
+
+1.  crim: per capita crime rate by town
+2.  zn: proportion of residential land zoned for lots over 25,000 sq.ft
+3.  indus: proportion of non-retail business acres per town
+4.  chas: Charles River dummy variable (1 if tract bounds river; else 0)
+5.  nox: nitric oxides concentration (parts per 10 million)
+6.  rm: average number of rooms per dwelling
+7.  age: proportion of owner-occupied units built prior to 1940
+8.  dis: weighted distances to five Boston employment centres
+9.  rad: index of accessibility to radial highways
+10. tax: full-value property-tax rate per $10,000
+11. ptratio: pupil-teacher ratio by town
+12. black: 1000(Bk - 0.63)^2 where Bk is the proportion of blacks by town
+13. lstat: % lower status of the population
+14. medv: Median value of owner-occupied homes in $1000’s
+
+
+
+
+```{r}
+pairs(Boston[,-14])
+```
+
+(c) Are any of the predictors associated with per capita crime rate?
+If so, explain the relationship.
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+(d) Do any of the suburbs of Boston appear to have particularly
+high crime rates? Tax rates? Pupil-teacher ratios? 
+
+
+```{r}
+par(mfrow=c(1,3))
+hist(Boston$crim, main = "Crime", xlab = "Per capita crime rate by town.")
+hist(Boston$tax, main = "Taxes", xlab = "Full-value property-tax rate per 10,000.")
+hist(Boston$ptratio, main = "Pupil-teacher ratio", xlab = "Pupil-teacher ratio by town.")
+
+
+```
+Como se puede ver gran parte de los suburbios tiene una tasa de crimen inferior al **20%**, la cantidad de suburbios valores superiores a este son:
+
+```{r}
+sum(Boston$crim > 20)
+
+```
+
+Los suburbios que tienen una tasa particularmente alta, es decir superior al **40%**  son:
+
+Suburbio      | Tasa
+------------- | -------------
+381           | 88.97
+419           | 73.53
+406           | 67.92
+411           | 51.13
+415           | 45.74
+405           | 41.53 
+
+
+
+Tax rates? 
+
+La cantidad de suburbios con un impuesto superior a **$600 USD**, sobre el total de bienes inmuebles por valor total de 10.000 dólares es de:
+
+```{r}
+sum(Boston$tax > 600)
+```
+Dentro de los cuales los siguientes distritos superan un impuesto de **$700 USD** son:
+
+
+Suburbio      | Tasa
+------------- | -------------
+491           | 711
+490           | 711
+489           | 711
+493           | 711
+492           | 711
+
+
+
+
+Pupil-teacher ratios? 
+
+
+La cantidad de suburbios que tienen una tasa de Profesor-alumno superior a 20 alumnos por profesor son: 
+
+```{r}
+sum(Boston$ptratio > 20)
+```
+Dentro de los cuales los siguientes 2 distritos tiene una tasa de 22 alumnos por profesor:
+
+
+Suburbio      | Tasa
+------------- | -------------
+356           | 22
+355           | 22
+
+
+
+
+Comment on the range of each predictor.
+
+```{r}
+sapply(Boston[,-14],range)
+```
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+(e) How many of the suburbs in this data set bound the Charles
+river?
+
+La cantidad de suburbios en Bostosn que limitan con el rio charles son:
+
+```{r}
+sum(Boston$chas == 1)
+```
+
