@@ -111,8 +111,18 @@ hist(college$Outstate, main = "Outstate", breaks = 10, xlab = "Out-of-state tuit
 vi. Continue exploring the data, and provide a brief summary
 of what you discover.
 
+```{r}
+plot(college$Outstate, college$PhD, main = "Costo de matricula vs PhD por facultad", xlab= "Costo de matricula", ylab = "PhD por facultad")
 
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+Se puede observar que existe una menor variación entre la cantidad de profesores que poseen un PhD en aquellos colleges que tienen una matricula alta, por ende se puede decir que el personal edicativo de estos establecimientos tienen en promedio un nivel educativo más alto.
+
+```{r}
+par(mfrow=c(1,2))
+hist(college$Enroll/college$Accept, main = "Proporción estudiantes aceptados matriculados", xlab="Proporción", ylab="Frecuencia", cex.main=0.8)
+plot(college$Private,(college$Enroll/college$Accept),xlab="Universidad Privada", ylab="Porcentaje")
+```
+Vemos de los estudiantes se fueron aceptados y se matricularon el **71%** de estos, se encuentra entre el **30%** al **60%** de matriculados por universidad. Dentro de los cuales el promedio de admitimos que pagan su matricula es mucho mayor en las universidades publicas que en las privadas, sin embargo estas presentan una mayor cantidad de datos atipicos, en los cuales incluso el **100%** de los admitidos se matriculan.
 
 9. This exercise involves the Auto data set studied in the lab. Make sure
 that the missing values have been removed from the data.
@@ -190,27 +200,20 @@ highlighting the relationships among the predictors. Comment
 on your findings.
 
 ```{r}
-pairs(Auto[,-9])
+pairs(Auto[,3:6])
 ```
-
-```{r}
-par(mfrow=c(2,2))
-hist(Auto$mpg, main = "MPG", xlab = "miles per gallon")
-hist(Auto$horsepower, main = "Horsepower", breaks = 8, xlab = "Engine horsepower")
-hist(Auto$weight, main = "Weight", breaks = 15, xlab = "Vehicle weight (lbs.)")
-hist(Auto$acceleration, main = "Acceleration", breaks = 10, xlab = "Time to accelerate from 0 to 60 mph (sec.)")
-
-```
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+1. Parece existir una relación lineal positiva entre los caballos de fuerza y el desplazamiento del motor, es decir que a mayor caballaje más desplazamiento del pistón dentro del cilindro.
+2. Puede haber una relación lineal positiva que indica un mayor caballaje a un mayor masa del vehículo.
+3. De igual manera que la anterior a mayor masa del vehículo, mayor desplazamiento.
+4. Se presume una relación lineal negativa entre desplazamiento y la aceleración, es decir que a un mayor recorrido del pistón, una menor aceleración.
+5. Se identifica una aparente relación lineal negativa entre los caballos de fuerza y la aceleración, a mayor cantidad de caballos de fuerza menor aceleración.
 
 (f) Suppose that we wish to predict gas mileage (mpg) on the basis
 of the other variables. Do your plots suggest that any of the
 other variables might be useful in predicting mpg? Justify your
 answer.
 
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-displacement, horsepower and weight
+Las otras variables que sugieren una relación de predicción de la variable mpg son displacement, horsepower y weight. Tenemos entonces que al incrementar cualquiera de estas variables las millas realizadas por galón decrecen, pudiendo incluso ajustarse a una recta con pendiente negativa.
 
 
 10. This exercise involves the Boston housing data set.
@@ -267,7 +270,13 @@ pairs(Boston[,-14])
 (c) Are any of the predictors associated with per capita crime rate?
 If so, explain the relationship.
 
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Parece haber algunos predictores asociados a la tasa de crimen por distritos sin embargo no se observa una relación clara que determine una función **f** entre ellos y las variables predictoras siendo ellas: nox, rm, age, dis y lstat.
+
+1. nox: Aparenta tener una relación linear con la tasa de crimen, es decir que tiene a haber más crimenes en zonas más contaminadas, 
+2. rm: Parece que la gran parte de los crimes esta asociados a áreas residenciales que poseen entre 5 a 7 hábitantes por vivienda
+3. aga: Esta dada una rleacón linear positiva entre estas variables con lo que se puede decir que, a una mayor ocupación de casa antiguas ocupadas mayor nivel de crimen.
+4. dist: Parte de una relación lineal aparentemente negativa, es decir que a mayor distancia de sus habitantes y los centro de empleo exsite una menor criminalidad.
+5. lstat: tiene una relación lineal con la tasa  de crimen es decir que a mayores niveles de probreza existe una memor ciminalidad.
 
 (d) Do any of the suburbs of Boston appear to have particularly
 high crime rates? Tax rates? Pupil-teacher ratios? 
@@ -347,19 +356,19 @@ Comment on the range of each predictor.
 sapply(Boston[,-14],range)
 ```
 
-1.  crim: Vemos que la tasa de crimeness en todo Boston no supera el **90%**, y en algunos casos en cercana a **0%**, tambien se aprecia como el **96%** de los suburbios de Boston, posee una tasa inferior al **20%** de criminalidad.
-2.  zn: Se aprecia que existen areas de de Boston que no poseen zonas residenciales por cada 25000 sq.ft, mientras otras se encuentran completamente llenas de areas residenciales siendo estas apenas el **2%**.
-3.  indus: El rango nos muestra que el grado de areas industriales máximo por cada Acre en bostón es apenas el **28%**. No obstante el **32%** de estas areas esta industrializadas en alrededor del **18%**.
-4.  chas: Esta en una variable logica donde se representa que si los distritos de boston conectan con el rio Charles vemos que apenas el **7%** de ellos no lo hacen.
-5.  nox: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+1.  crim: Vemos que la tasa de crimenes en todo Boston no supera el **90%**, y en algunos casos en cercana a **0%**, tambien se aprecia como el **96%** de los suburbios de Boston, posee una tasa inferior al **20%** de criminalidad.
+2.  zn: Se aprecia que existen áreas de de Boston que no poseen zonas residenciales por cada 25000 sq.ft, mientras otras se encuentran completamente llenas de áreas residenciales siendo estas apenas el **2%**.
+3.  indus: El rango nos muestra que el grado de áreas industriales máximo por cada Acre en Boston es apenas el **28%**. No obstante el **32%** de estas áreas esta industrializadas en alrededor del **18%**.
+4.  chas: Esta en una variable logica donde se representa que si los distritos de Boston conectan con el río Charles vemos que apenas el **7%** de ellos no lo hacen.
+5.  nox: Es apreciable que el rango de concentración de Nitrogeno de oxigeno por cada 10 millones se encuentra entre 0.385 y 0.871. con el **50%** de los distritos con un nivel de contaminazión que va entre **0.45 - 0.62**
 6.  rm: Vemos que el numero de habitantes por vivienda se encentra entre el 3 a 9 personas, de las cuales el **84%** se encuentran habitadas entre 5 a 7 personas por vivienda.
-7.  age: Se aprecia que la proporcion de viviendas ocupadas por distrito que fueron construidas antes del 1940, se encuentra entre el **2** y el **100**, lo que parece ser un indicativo que grandes areas de la ciudad poseen edificios activos con más de 80 años de antiguedad para la fecha actual.
+7.  age: Se aprecia que la proporción de viviendas ocupadas por distrito que fueron construidas antes del 1940, se encuentra entre el **2** y el **100**, lo que parece ser un indicativo que grandes áreas de la ciudad poseen edificios activos con más de 80 años de antiguedad para la fecha actual.
 8.  dis: Se puede observar que la media de la distancia a los centro de empleo no supera los 12 km, con lo cual se puede decir que Boston es un a ciudad relativamente pequeña.
 9.  rad: Se aprecia que el indice de accesibilidad a autopistas radiales es va desde **0** a **24**, de los cuales el **74%** tiene un indice inferior a **10**.
-10. tax: Se evidencia que para ningun distrito la tas de impuesto por inmueble por cada **$1000 USD** es inferior a **$187 USD** y que en solo el **27%** de los suburbios es superior a **$600 USD**.
-11. ptratio: Es claro que la tasa de profesores por alumno, no supera **22** alumnos por profesor es decir que se puede decir que en el peor de los casos los salones apenas superan la mitad de los estudiantes maximos por profesor en Bogotá.
-12. black: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-13. lstat: % lower status of the population
+10. tax: Se evidencia que para ningún distrito la tasas de impuesto por inmueble por cada **$1000 USD** es inferior a **$187 USD** y que en solo el **27%** de los suburbios es superior a **$600 USD**.
+11. ptratio: Es claro que la tasa de profesores por alumno, no supera **22** alumnos por profesor es decir que se puede decir que en el peor de los casos los salones apenas superan la mitad de los estudiantes máximos por profesor en Bogotá.
+12. black: podemos ver que la propoción de habitantes de color Negro en algunas áreas es casi nula, mientras otras ronda los 400.
+13. lstat: Vemos que el porcentaje de ciudadanos de bajos ingresos, por cada distrito de boston, no supera el **38%**, y que el **73%**, de los distritos registra niveles de probreza entre el **5-20%**
 
 
 
