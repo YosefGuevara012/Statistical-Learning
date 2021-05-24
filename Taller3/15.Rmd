@@ -1,0 +1,156 @@
+---
+output: word_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+```
+
+15. This problem involves the Boston data set, which we saw in the lab for this chapter. We will now try to predict per capita crime rate using the other variables in this data set. In other words, per capita crime rate is the response, and the other variables are the predictors.
+
+(a) For each predictor, fit a simple linear regression model to predict the response. Describe your results. In which of the models is there a statistically significant association between the predictor and the response? Create some plots to back up your assertions.
+
+
+
+```{r message = F, warning = F}
+Boston <- MASS::Boston
+Boston$chas <- factor(Boston$chas)
+
+Boston.zn<-lm(crim~zn,data=Boston)
+summary(Boston.zn)
+Boston.indus<-lm(crim~indus,data=Boston)
+summary(Boston.indus)
+Boston.chas<-lm(crim~chas,data=Boston)
+summary(Boston.chas)
+Boston.nox<-lm(crim~nox,data=Boston)
+summary(Boston.nox)
+Boston.rm<-lm(crim~rm,data=Boston)
+summary(Boston.rm)
+Boston.age<-lm(crim~age,data=Boston)
+summary(Boston.age)
+Boston.dis<-lm(crim~dis,data=Boston)
+summary(Boston.dis)
+Boston.rad<-lm(crim~rad,data=Boston)
+summary(Boston.rad)
+Boston.tax<-lm(crim~tax,data=Boston)
+summary(Boston.tax)
+Boston.ptratio<-lm(crim~ptratio,data=Boston)
+summary(Boston.ptratio)
+Boston.black<-lm(crim~black,data=Boston)
+summary(Boston.black)
+Boston.lstat<-lm(crim~lstat,data=Boston)
+summary(Boston.lstat)
+Boston.medv<-lm(crim~medv,data=Boston)
+summary(Boston.medv)
+```
+De estos modelos simples solo la variable chas no presenta evidencia significativa de que exista una relación linear con la taza de crimen, su valor p es mayor a 0.05 por lo que no se rechaza la hipótesis nula $\beta_1 = 0$. Para todas la otras variables si se rechaza esta hipótesis nula.
+
+
+```{r}
+pairs(Boston)
+```
+
+
+(b) Fit a multiple regression model to predict the response using all of the predictors. Describe your results. For which predictors can we reject the null hypothesis $H_0 : \beta_j = 0$?
+
+
+```{r}
+crim_fit <- lm(crim ~ ., data = Boston)
+
+summary(crim_fit)
+```
+Se rechaza la hipótesis nula 
+We can reject the null hypothesis $H_0 : \beta_j = 0$ con un nivel de 0.05 para las siguientes variables:
+
+* `zn`
+* `dis`
+* `rad`
+* `black`
+* `medv`
+
+Para todas las otras variables el valor p es menor de 0.05.
+
+(c) How do your results from (a) compare to your results from (b)? Create a plot displaying the univariate regression coefficients from (a) on the x-axis, and the multiple regression coefficients from (b) on the y-axis. That is, each predictor is displayed as a single point in the plot. Its coefficient in a simple linear regres- sion model is shown on the x-axis, and its coefficient estimate in the multiple linear regression model is shown on the y-axis.
+
+
+See the table below, where `Slope` appears as the x-axis variable, and is $\hat{\beta_1}$ in the simple linear regression case. `Estimate` is the y-axis variable, $\hat{\beta_j}$, the coefficient estimate for the variable in the multiple regression equation.
+
+```{r}
+multiple_reg <- summary(crim_fit)$coefficients %>% as.data.frame() 
+multiple_reg$variable <- row.names(multiple_reg)   
+multiple_reg <- multiple_reg[2:nrow(multiple_reg), c("variable", "Estimate")]
+rownames(multiple_reg) = seq(length=nrow(multiple_reg))
+colnames(multiple_reg)[colnames(multiple_reg) == "Estimate"] <- "Reg.Multiple" 
+
+
+reg_simple <- c(coef(Boston.zn)[1], coef(Boston.indus)[1], coef(Boston.chas)[1], coef(Boston.nox)[1],
+       coef(Boston.rm)[1], coef(Boston.age)[1], coef(Boston.dis)[1], coef(Boston.rad)[1],
+       coef(Boston.tax)[1], coef(Boston.ptratio)[1], coef(Boston.black)[1], coef(Boston.lstat)[1],
+       coef(Boston.medv)[1])
+
+
+multiple_reg$Reg.Simple <- reg_simple
+
+multiple_reg
+
+ggplot(multiple_reg, aes(x = Reg.Simple, y = Reg.Multiple, col = factor(variable))) + 
+  geom_jitter() + 
+  labs(x = "Coeficientes de Reg Linear Simple", 
+       y = "Coeficientes de Reg Linear Multiple") 
+
+```
+
+
+
+(d) Is there evidence of non-linear association between any of the predictors and the response? To answer this question, for each predictor X, fit a model of the form: $Y = \beta_0 + \beta_1X + \beta_2X^2 + \beta_3X^3 + \epsilon$
+
+Para la variable chas no se aplica este modelo porque es una variable binaria.
+
+```{r}
+lm.fit.zn=lm(crim~poly(zn,3),data=Boston)
+summary(lm.fit.zn)
+lm.fit.indus=lm(crim~poly(indus,3),data=Boston)
+summary(lm.fit.indus)
+lm.fit.nox=lm(crim~poly(nox,3),data=Boston)
+summary(lm.fit.nox)
+lm.fit.rm=lm(crim~poly(rm,3),data=Boston)
+summary(lm.fit.rm)
+lm.fit.age=lm(crim~poly(age,3),data=Boston)
+summary(lm.fit.age)
+lm.fit.dis=lm(crim~poly(dis,3),data=Boston)
+summary(lm.fit.dis)
+lm.fit.rad=lm(crim~poly(rad,3),data=Boston)
+summary(lm.fit.rad)
+lm.fit.tax=lm(crim~poly(tax,3),data=Boston)
+summary(lm.fit.tax)
+lm.fit.ptratio=lm(crim~poly(ptratio,3),data=Boston)
+summary(lm.fit.ptratio)
+lm.fit.black=lm(crim~poly(black,3),data=Boston)
+summary(lm.fit.black)
+lm.fit.lstat=lm(crim~poly(lstat,3),data=Boston)
+summary(lm.fit.lstat)
+lm.fit.medv=lm(crim~poly(medv,3),data=Boston)
+summary(lm.fit.medv)
+```
+Las variables que tienen evidencia significativa de una relación lineal con $X^2$ son: zn, indus, nox, rm, age, dis, rax, ptradio y  medv.
+
+Las variables que tienen evidencia significativa de una relación lineal con $X^3$ son: indux, nox, age, dis y medv.
+
+Below are a couple of examples of predictors where the cubic term is significant. Using the `formula` argument in `geom_smooth(method = "lm", )`, we can overlay the cubic line directly onto the scatter plot:
+
+A continuación se exponen dos gráficas con las dos variables que más tuvieron evidencia estadisticamente significativa de una relación lineal de Y en X de la forma polinomial.
+```{r}
+ggplot(Boston, aes(x = medv, y = crim)) + 
+  geom_point(alpha = 0.5) + 
+  geom_smooth(method = "lm", formula = "y ~ x + I(x^2) + I(x^3)") + 
+  labs(title = "Variable 'medv' vs. 'crim'")
+
+ggplot(Boston, aes(x = nox, y = crim)) + 
+  geom_point(alpha = 0.5) + 
+  geom_smooth(method = "lm", formula = "y ~ x + I(x^2) + I(x^3)") + 
+  labs(title = "Variable 'nox' vs. 'crim'")
+```
+

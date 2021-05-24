@@ -1,0 +1,282 @@
+---
+title: "Cap3"
+output: word_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(ggplot2)
+library(GGally)
+library(MASS)
+library(lmtest)
+library(nortest)
+library(dplyr)
+library(MVN)
+library(ISLR)
+library(corrplot)
+library(gridExtra)
+library(leaps)
+library(car)
+library(visreg)
+```
+
+
+***Punto 8***
+
+This question involves the use of simple linear regression on the Auto data set.
+
+(a) Use the lm() function to perform a simple linear regression with mpg as the response and horsepower as the predictor. Use the summary() function to print the results. Comment on the output.
+For example:
+
+```{r}
+data(Auto)
+summary(Auto)
+attach(Auto)
+names(Auto)
+
+mod1<-lm(mpg~horsepower)
+summary(mod1)
+```
+
+i. Is there a relationship between the predictor and the response?
+
+Si se presenta relación lineal entre mpg y horsepower ya que el coeficiente para es suficientemente significativo en este modelo lineal.
+
+ii. How strong is the relationship between the predictor and the response?
+
+La relación es muy fuerte, el p_valor es prácticamente cero (0).
+
+iii. Is the relationship between the predictor and the response positive or negative?
+
+El valor del coeficiente es negativo, lo cual indica que la relación es negativa es decir, a medida que aumenta la potencia del motor, disminuyen el rendimiento medido con mpg.
+
+iv. What is the predicted mpg associated with a horsepower of 98? What are the associated 95 % confidence and prediction intervals?
+
+```{r}
+pred <- data.frame(horsepower=98)
+predict(mod1, pred, interval = "confidence")
+predict(mod1, pred, interval = "prediction")
+```
+
+(b) Plot the response and the predictor. Use the abline() function to display the least squares regression line.
+
+```{r}
+plot(Auto$horsepower, Auto$mpg)
+abline(mod1, col="blue")
+```
+
+(c) Use the plot() function to produce diagnostic plots of the least squares regression fit. Comment on any problems you see with the fit.
+
+```{r}
+par(mfrow=c(2,2))
+plot(mod1)
+```
+
+***Punto 9***
+
+This question involves the use of multiple linear regression on the Auto data set.
+
+
+```{r}
+pairs(Auto[1:9], 
+      main = "Datos Auto",
+      pch = 21, 
+      bg = c("#1b9e77", "#d95f02", "#7570b3"))
+```
+
+(b) Compute the matrix of correlations between the variables using the function cor(). You will need to exclude the name variable, cor() which is qualitative.
+
+```{r}
+Auto$name = NULL
+auto.cor <- cor(Auto, method = "pearson")
+round(auto.cor, digits = 2)
+corrplot(auto.cor)
+```
+
+(c) Use the lm() function to perform a multiple linear regression with mpg as the response and all  other variables except name as the predictors. Use the summary() function to print the results 
+Comment on the output. For instance:
+
+i. Is there a relationship between the predictors and the response?
+
+```{r}
+mod_full<-lm(mpg~cylinders+displacement+horsepower+weight+acceleration+year+origin)
+summary(mod_full)
+```
+Observando los p_valores del summary(), se logra evidenciar que hay coefcientes que no son significativos para este modelo, por ejemplo cylinders, horsepower y acceleration
+
+ii. Which predictors appear to have a statistically significant relationship to the response?
+
+Los predictores significatvos son: displacement, weight, year y origin. Todos presentan una relación pisitiva salvo el peso indicando que a mayor peso, menos millas por galón.
+
+iii. What does the coefficient for the year variable suggest?
+
+Es evidente que entre mayor sea el año, es decir entre mpas nuevo el vehículo, mayor será el rendimiento medido en millas por galón.
+
+
+(d) Use the plot() function to produce diagnostic plots of the linear regression fit. Comment on any problems you see with the fit. Do the residual plots suggest any unusually large outliers? Does the leverage plot identify any observations with unusually high leverage?
+
+(e) Use the * and : symbols to fit linear regression models with interaction effects. Do any interactions appear to be statistically significant?
+
+```{r}
+mod_int<-lm(mpg~displacement+weight+year+origin+displacement*weight+weight*year)
+summary(mod_int)
+```
+
+Cuando se trabajan interacciones entre las variables, resultan ser significativas por ejemplo weight multiplicado por year o displacement*weight, además otras variables pierden significacancia individualmente como origin y weight.
+
+(f) Try a few different transformations of the variables, such as log(X), √X, X2. Comment on your findings.
+
+```{r}
+mod_int_1 <- lm(mpg~poly(displacement,3)+weight+year+origin)
+summary(mod_int_1)
+mod_int_2 <- lm(mpg~displacement+I(log(weight))+year+origin)
+summary(mod_int_2)
+mod_int_3 <- lm(mpg~displacement+I(weight^2)+year+origin)
+summary(mod_int_3)
+```
+
+En el caso de los polinomios, se evidencia que el polinomio de segundo grado tiene mayor efecto que otros de grado superior. Además de explicar la mayor variabilidad de los modelos planteados como por ejemplo los que incluyen log() y raiz cuadrada.
+
+
+***Punto 10***
+
+This question should be answered using the Carseats data set.
+
+(a) Fit a multiple regression model to predict Sales using Price, Urban, and US.
+
+```{r}
+data(Carseats)
+summary(Carseats)
+attach(Carseats)
+names(Carseats)
+
+mod_cs_1 <- lm(Sales~Price+Urban+US)
+summary(mod_cs_1)
+```
+
+
+(b) Provide an interpretation of each coefficient in the model. Be careful—some of the variables in the model are qualitative!
+
+
+La primera estimación del coeficiente "Price" indica que aprte de ser significativo estadísticamente,
+
+A medida que el precio aumenta, las ventas bajan en una relación de 0.054 aproximadamante. Por otro lado, si la ubicación es urbana no es representativa en el modelo. Por lo cual no es adecuado interpretarlo.
+
+Finalmente el hecho de que el punto de venta se encuentre en US aumenta las ventas en un factor de 1,2. Por ejemplo, por cada 100 unidades vendidas dentro de US, las ventas aumentan 1200.
+
+
+(c) Write out the model in equation form, being careful to handle the qualitative variables properly.
+
+Sales = 13.04 - 0.054Price + 1.201USYes
+
+(d) For which of the predictors can you reject the null hypothesis H0 : βj = 0?
+
+Se puede rechazar la hipótesis nula H0: Bi=0 para los coeficientes price y USYes, ya que son realmente significativos.
+
+(e) On the basis of your response to the previous question, fit a smaller model that only uses the predictors for which there is evidence of association with the outcome.
+
+```{r}
+mod_cs_2 <- lm(Sales~Price+US)
+summary(mod_cs_2)
+```
+
+Sales = 13.03 - 0.054Price + 1.199USYes
+
+En este caso todos los coeficientes del modelo son significativos 
+
+
+(f) How well do the models in (a) and (e) fit the data?
+
+```{r}
+elegir_1<-regsubsets(Sales~Price+Urban+US, data = Carseats)
+plot(elegir_1,scale="r2", main="R^2")
+```
+
+Por criterio de R^2, se observa que el modelo con las variables de Price y USYes es más adecuada ya que retiene el 0.24 de la variabilidad del modelo con menos variables y por supuesto mas fácil de interpretar.
+
+Por la suma de los cuadrados del error nos damos cuenta que en el segundo modelo es menor. El RSE del primer modelo es 2.472, mientras que en el segundo es 2.469
+
+
+(g) Using the model from (e), obtain 95 % confidence intervals for the coefficient(s).
+
+```{r}
+confint(mod_cs_2)
+```
+
+
+(h) Is there evidence of outliers or high leverage observations in the model from (e)?
+
+
+```{r}
+par(mfrow=c(2,2))
+plot(mod_cs_2)  
+par(mfrow=c(1,1))
+plot(predict(mod_cs_2), rstudent(mod_cs_2))
+qqPlot(mod_cs_2, main="QQ Plot")
+leveragePlots(mod_cs_2)
+plot(hatvalues(mod_cs_2))
+```
+
+
+11. In this problem we will investigate the t-statistic for the null hypothesis H0 : β = 0 in simple linear regression without an intercept. To begin, we generate a predictor x and a response y as follows.
+
+```{r}
+set.seed (1)
+x= rnorm (100)
+y=2* x+rnorm (100)
+```
+
+(a) Perform a simple linear regression of y onto x, without an intercept. Report the coefficient estimate βˆ, the standard error of this coefficient estimate, and the t-statistic and p-value associated with the null hypothesis H0 : β = 0. Comment on these results. (You can perform regression without an intercept using the command lm(y∼x+0).)
+
+```{r}
+mod11<-lm(y~x+0)
+summary(mod11)
+```
+
+El p_value es muy pequeño y por lo tanto el coefciente de X es significativo dentro del modelo. La hipótesis nula H0: B=0 se rechaza. El error estándar es 0.1065 y el valor del estadístico T es 18.73
+
+
+(b) Now perform a simple linear regression of x onto y without an intercept, and report the coefficient estimate, its standard error, and the corresponding t-statistic and p-values associated with the null hypothesis H0 : β = 0. Comment on these results.
+
+```{r}
+mod12<-lm(x~y+0)
+summary(mod12)
+```
+
+De forma similar a lo observado en el literal anterior, el p_value es muy pequeño y por lo tanto el coefciente de X es significativo dentro del modelo. La hipótesis nula H0: B=0 se rechaza.
+El error estándar es 0.1065 y el valor del estadpistico T es 18.73
+
+(c) What is the relationship between the results obtained in (a) and (b)?
+
+```{r}
+par(mfrow=c(1,2))
+visreg(mod11, "x", partial = F)
+visreg(mod12, "y", partial = F)
+```
+
+Como se puede observar, hay una relación lineal perfecta entre las dos variables a medida que aumenta x también aumenta y y viceversa.
+
+
+(e) Using the results from (d), argue that the t-statistic for the regression of y onto x is the same as the t-statistic for the regression of x onto y.
+
+Como las dos rectas de regresión son iguales, los estadísticos t también lo son. Lo único que varía es el sentido de los ejes de un modelo a otro.
+
+
+(f) In R, show that when regression is performed with an intercept, the t-statistic for H0 : β1 = 0 is the same for the regression of y onto x as it is for the regression of x onto y.
+
+
+```{r}
+mod21<-lm(x~y)
+mod22<-lm(y~x)
+
+summary(mod21)
+summary(mod22)
+
+par(mfrow=c(1,2))
+visreg(mod21, "x", partial = F)
+visreg(mod22, "y", partial = F)
+```
+
+Los estadpisticos t en este caso son iguales a 18.56 en ambos casos

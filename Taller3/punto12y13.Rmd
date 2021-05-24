@@ -277,3 +277,29 @@ confint(y_en_x_e_menos)
 * Los intervalos de confianza de $\beta_0$ tienen su centro de masa en -1 y los de $\beta_1$ en 0.5
 
 
+$$R^2 = \frac{TSS-RSS}{TSS} = 1 -\frac{RSS}{TSS}$$
+
+
+$$R^2 = \frac{TSS-RSS}{TSS} = 1 -\frac{\sum_{i=1}^{n}\left (y_i - \hat{y}_i \right )^2}{\sum_{i=1}^{n}\left (y_i - \bar{y}_i \right )^2}$$
+
+
+
+$$R^2 = \frac{TSS-RSS}{TSS} = 1 -\frac{\sum_{i=1}^{n}\left (y_i - \hat{\beta}_0 - {\beta}_1x_i \right )^2}{\sum_{i=1}^{n}\left (y_i\right )^2}$$
+
+
+
+
+
+$$R^2 = \frac{TSS-RSS}{TSS} = 1 -\frac{\sum_{i=1}^{n}\left (y_i - \bar{y}+\hat{\beta_1}\bar{x} - \hat{\beta_1}x_i \right )^2}{\sum_{i=1}^{n}\left (y_i\right )^2}$$
+
+
+
+
+$$R^2 = \frac{TSS-RSS}{TSS} = 1 -\frac{\sum_{i=1}^{n}\left (y_i  - \hat{\beta_1}x_i \right )^2}{\sum_{i=1}^{n}\left (y_i\right )^2}$$
+
+$$ R^2 = 1- \sum_{i=1}^{n} \left ( y_{i}-\left ( \frac{\sum_{j=1}^{n} x_{j}y_{j} }{\sum_{k=1}^{n} x_{k}^{2}} \right ) x_{i} \right )^{2}$$
+
+
+
+
+$$Cor \left( X, Y\right) = \frac{\sum_{i=1}^{n} x_{i} y_{i}}{\sqrt{\sum_{j=1}^{n}x_{j}^{2}\sum_{k=1}^{n}y_{k}^{2}} } $$
