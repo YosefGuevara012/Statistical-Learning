@@ -1,0 +1,91 @@
+---
+title: "Cap 8. Exercises"
+output: word_document
+---
+
+
+
+8. This question involves the use of simple linear regression on the Auto
+data set.
+
+```{r}
+library("ISLR")
+data(Auto)
+attach(Auto)
+```
+
+(a) Use the lm() function to perform a simple linear regression with
+mpg as the response and horsepower as the predictor. Use the
+summary() function to print the results. Comment on the output.
+For example:
+
+```{r}
+lm.fit <- lm(mpg ~ horsepower)
+summary(lm.fit)
+```
+
+i. Is there a relationship between the predictor and the response?
+
+Sí, existe una relación entre **horsepower** y *mpg*, puesto que p-value < 0.05, por lo tanto se rechaza **Ho**, estando esta relación dada por la ecuacion:
+
+$$ mpg = 39.93 -0.158*horsepower + \epsilon $$
+
+ii. How strong is the relationship between the predictor and
+the response?
+
+```{r}
+### Media de la variable respuesta
+
+media_y <- mean(mpg)
+media_y
+```
+```{r}
+### Media de la variable respuesta
+
+porcentaje_error <-  4.906/media_y
+porcentaje_error
+```
+
+
+Para los datos de **Auto**, **RSE** es **4.906**, mientras que la media para **mpg** es **23.45**, indicando un percentage de error del **21%**. Mientras que el porcentaje de la variabilidad en la respuesta esta dado por **R^2 = 0.6059 **, es decir que **horsepower** explica el **61%** de la varianza de **mpg**.
+
+iii. Is the relationship between the predictor and the response
+positive or negative?
+
+La relacion entre **mpg** y **horsepower** es negativa, es decir que por cada caballo de fuerza adicional, la disminución promedio de las millas por galon que pude realizar el vehiculo  disminuye **0.158**
+
+iv. What is the predicted mpg associated with a horsepower of
+98? What are the associated 95% confidence and prediction
+intervals?
+
+El intervalo de confianza para **horsepower  = 98** esta dado por:
+
+```{r}
+predict(lm.fit, data.frame(horsepower = 98), interval = "confidence")
+```
+El intervalo de predicción para **horsepower  = 98** esta dado por:
+
+```{r}
+predict(lm.fit, data.frame(horsepower = 98), interval = "prediction")
+```
+
+
+(b) Plot the response and the predictor. Use the abline() function
+to display the least squares regression line.
+
+```{r}
+plot(horsepower,mpg, main = "mpg vs. horsepower", xlab="horsepower", ylab="mpg")
+abline(lm.fit, col="red")
+```
+
+
+(c) Use the plot() function to produce diagnostic plots of the least
+squares regression fit. Comment on any problems you see with
+the fit.
+
+
+
+```{r}
+par(mfrow = c(2, 2))
+plot(lm.fit)
+```
