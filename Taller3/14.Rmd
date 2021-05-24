@@ -1,0 +1,178 @@
+---
+title: "Cap 14. Exercises"
+output: word_document
+---
+
+
+14. This problem focuses on the collinearity problem.
+
+(a) Perform the following commands in R:
+
+```{r}
+set.seed (1)
+x1=runif (100)
+x2 =0.5* x1+rnorm (100) /10
+y=2+2* x1 +0.3* x2+rnorm (100)
+
+```
+
+The last line corresponds to creating a linear model in which y is
+a function of x1 and x2. Write out the form of the linear model.
+What are the regression coefficients?
+
+$$y = 2x_1+0.3x_2 +2 +\varepsilon $$
+
+b) What is the correlation between x1 and x2? Create a scatterplot
+displaying the relationship between the variables.
+
+
+La correlación entre **x1** y **x2** esta dada por:
+
+```{r}
+cor(x1,x2)
+```
+
+Al graficar **x1** frente a **x2** tenemos:
+
+```{r}
+
+plot(x1,x2, main = "x1 vs. x2", xlab="x1", ylab="x2")
+
+```
+
+
+(c) Using this data, fit a least squares regression to predict y using
+x1 and x2. 
+
+```{r}
+lm.fit <- lm(y ~ x1 + x2)
+summary(lm.fit)
+```
+
+Describe the results obtained. What are β0, β1, and β2? 
+
+β0: Es el intersecto con el eje y, cuando x1 = x2 = 0, que para este caso seria el punto(0,0,2.1305) 
+
+
+How do these relate to the true β0, β1, and β2?
+
+Los coeficientes del ajuste describen la ecuación dada por:
+
+$$ y = 2.13 + 1.43x_1$$
+
+Para este caso β1 = es 40% mas pequeño que el verdadero valor de β1, por otro lado β1, no se tiene encuenta en este modelo, mientras que βo no esta muy alejado del valor real de βo
+
+
+Can you reject the null hypothesis H0 : β1 = 0?
+
+Para β1 es posible rechazar H0 : β1 = 0, pues p-value < 0.05
+
+How about the null hypothesis H0 : β2 = 0?
+
+Para β2 no es posible rechazar H0 : β2 = 0, pues p-value > 0.05
+
+
+d) Now fit a least squares regression to predict y using only x1.
+Comment on your results. Can you reject the null hypothesis
+H0 : β1 = 0?
+
+```{r}
+plot(x1, y, main="y vs. x1", xlab="x1", ylab="y")
+
+```
+
+```{r}
+lm.fitx1 <- lm(y~x1)
+summary(lm.fitx1)
+```
+Al ajustar el modelo de minimos cuadrados solamente usando x1, es posible rechazar la hipotesis nula en favor de hipetesis alternativa por lo tano B1 es diferente de 0, dado que el p-value < 0.05.
+
+(e) Now fit a least squares regression to predict y using only x2. Comment on your results. Can you reject the null hypothesis H0 : β1 = 0?
+
+```{r}
+plot(x2, y, main="y vs. x2", xlab="x2", ylab="y")
+
+```
+
+```{r}
+lm.fitx2 <- lm(y~x2)
+summary(lm.fitx2)
+```
+Al ajustar el modelo de minimos cuadrados solamente usando x2, no es posible rechazar la hipotesis nula en favor de hipetesis alternativa por lo tanto B1 = 0, dado que el p-value > 0.05.
+
+(f) Do the results obtained in (c)–(e) contradict each other? Explain your answer.
+
+No, estos resultados no se contradicen,esto de debe a que los predictores "x1" y "x2" están muy correlacionados **cor(x1,x2) = 0.84** es decir que existe una colinealidad, por lo que es dificil determinar como se asocia cada ***x1** y **x2** con **y**. Al ser la precisión de nuestro modelo pequeña el error estándar para **β1 = 0,72** y para  **β2 = 1,133** para el modelo completo, por otro lado para el modelo que solo involucra x1  **β1 =  0,40** y para el modelo que solo involucara x2 **β1 =  0,63*30467**. Por lo que la varaible x2 pierde importancia al presentar colinealidad con x1.
+
+
+
+(g) Now suppose we obtain one additional observation, which was unfortunately mismeasured.
+
+
+```{r}
+x1=c(x1 , 0.1)
+x2=c(x2 , 0.8)
+y=c(y,6)
+```
+
+Re-fit the linear models from (c) to (e) using this new data. 
+
+```{r}
+lm.fit <- lm(y ~ x1 + x2)
+summary(lm.fit)
+
+```
+
+```{r}
+lm.fitx1 <- lm(y ~ x1)
+summary(lm.fitx1)
+
+```
+
+```{r}
+lm.fitx2 <- lm(y ~ x2)
+summary(lm.fitx2)
+
+```
+
+
+What effect does this new observation have on the each of the models?
+
+
+Al agregarse este nueva lectura, se aprecia que el modelo que se ajusta para x1 y x2 al mismo tiempo, no rechaza la hipotesis H0 : β1 = 0 y rechaza la hipotesis H0 : β2 = 0, es decir que para este modelo solo x2 es una variable regresora significativa.
+
+Para el modelo que solo involucra X1 o solo a x2, tampoco se rechaza la hipotesis nula, no obstante en ninguno de los 2 casos R2 es capaz de explicar más de 25% de la varianza de y.
+
+
+
+```{r}
+
+par(mfrow=c(1,2))
+plot(x1, y, main="y vs. x1", xlab="x1", ylab="y")
+abline(lm.fitx1, col="red")
+plot(x2, y, main="y vs. x2", xlab="x2", ylab="y")
+abline(lm.fitx2, col="red")
+```
+
+
+In each model, is this observation an outlier?A high-leverage point? Both? Explain your answers.
+
+
+```{r}
+par(mfrow=c(2,2))
+plot(lm.fit)
+```
+Modelo ajustado que contiene las varibles  X1 + X2: el gráfico de **Redisuales vs el apalancamiento** muestra que la nueva observación **101** resalta causando grandes problemas al estar como se observa pues la linea roja esta lejos de la linea negra.
+
+
+```{r}
+par(mfrow=c(2,2))
+plot(lm.fitx1)
+```
+Modelo unicamente con la varible X1: El nuevo punto tiene un apalancamiento alto pero no causa problemas porque el nuevo punto no es un valor atípico para x1 o y.
+
+```{r}
+par(mfrow=c(2,2))
+plot(lm.fitx2)
+```
+* Modelo unicamente con la varible X2: el nuevo punto tiene un alto apalancamiento sin embargo no presenta problemas al estar cercano a la linea demarcada por el modelo ajustado.

@@ -1,0 +1,279 @@
+---
+output: word_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+```
+
+12. This problem involves simple linear regression without an intercept.
+
+(a) Recall that the coefficient estimate $\hat{\beta}$ for the linear regression of Y onto X without an intercept is given by (3.38). Under what circumstance is the coefficient estimate for the regression of X onto Y the same as the coefficient estimate for the regression of Y onto X?
+
+El estimador del coeficiente $\beta$ de la regresión lineal de Y en X sin intercepto es:
+        
+$$\hat{\beta} = \frac{\sum_{i=1}^n x_iy_i }{\sum_{i=1}^n x_i^2}$$
+La regresion de Y en Xy de X en Y es $Y = \beta_a X$ y $Y = \beta_b X$ respectivamete, entonces $\beta_a = \beta_b$ cuando:
+
+$$\hat{\beta_a} = \hat{\beta_b} $$
+$$\frac{\sum{xy}}{\sum{x^2}} = \frac{\sum{yx}}{\sum{y^2}}$$
+$$\sum_{i = 1}^n{x_i^2} = \sum_{i = 1}^n{y_i^2}$$
+El estimador del coeficiente $\beta$ de Y en X y el de X en Y será igual cuando $\sum_{i = 1}^n{x_i^2} = \sum_{i = 1}^n{y_i^2}$
+
+(b) Generate an example in R with n = 100 observations in which the coefficient estimate for the regression of X onto Y is different from the coefficient estimate for the regression of Y onto X.
+
+Se generan los datos con esta ecuación:
+$$y = 3\cdot x + \epsilon$$
+$$\epsilon \sim \mathcal{N}(0, 1)$$
+
+```{r}
+set.seed(777)
+x <- rnorm(100)
+y <- 3*x + rnorm(100, sd = 1)
+data <- data.frame(x, y)
+
+y_en_x <- lm(y ~ x + 0)
+x_en_y <- lm(x ~ y + 0)
+```
+* $\hat{\beta_a}$ = `r round(coef(y_en_x), 6)`
+* $\hat{\beta_b}$ = `r round(coef(x_en_y), 6)`
+
+* $\sum_{i = 1}^n{x_i^2}$ = `r sum(x^2)`
+* $\sum_{i = 1}^n{y_i^2}$ = `r sum(y^2)`
+
+En este caso entonces $\hat{\beta_a} \ne \hat{\beta_b}$:
+
+```{r}
+ggplot(data, aes(x, y)) + 
+  geom_point(color="red") + 
+  geom_abline(intercept = 0, slope = coef(y_en_x), size = 1, col = "deepskyblue3", show.legend=TRUE) + 
+  geom_abline(intercept = 0, slope = 1/coef(x_en_y), size = 1, col = "mediumseagreen", show.legend=FALSE) + 
+  scale_colour_manual(name="",labels = c("Coeficiente de Y en X (\beta)", "1/Coeficiente"), 
+                      values=c("deepskyblue3", "mediumseagreen")) +
+  theme_bw()
+
+```
+
+En la gráfica se presenta la pendiente $\beta_a$ y $1/\beta_a$ y se ve que no son iguales.
+
+
+
+(b) Generate an example in R with n = 100 observations in which the coefficient estimate for the regression of X onto Y is the same as the coefficient estimate for the regression of Y onto X.
+
+Cuando $x = y$ ó cuando X es una permutación de Y y Y una permutación de X.
+
+```{r}
+set.seed(100)
+x <- rnorm(100)
+y <- x
+data <- data.frame(x, y)
+
+y_en_x <- lm(y ~ x + 0)
+x_en_y <- lm(x ~ y + 0)
+```
+* $\hat{\beta_a}$ = `r round(coef(y_en_x), 6)`
+* $\hat{\beta_b}$ = `r round(coef(x_en_y), 6)`
+```{r}
+ggplot(data, aes(x, y)) + 
+  geom_point(color="red") + 
+  geom_abline(intercept = 0, slope = coef(y_en_x), size = 1, col = "deepskyblue3") + 
+  geom_abline(intercept = 0, slope = 1 / coef(x_en_y), size = 1, col = "mediumseagreen")
+```
+En esta gráfica $\beta_a = 1/\beta_b$
+
+Otro ejemplo es cuando $y = |x|$:
+
+
+```{r}
+set.seed(5)
+x <- rnorm(100)
+y <- abs(x)
+data <- data.frame(x, y)
+
+y_en_x <- lm(y ~ x + 0)
+x_en_y <- lm(x ~ y + 0)
+```
+* $\hat{\beta_a}$ = `r round(coef(y_en_x), 6)`
+* $\hat{\beta_b}$ = `r round(coef(x_en_y), 6)`
+\
+
+13. In this exercise you will create some simulated data and will fit simple linear regression models to it. Make sure to use set.seed(1) prior to starting part (a) to ensure consistent results.
+
+```{r}
+set.seed(1)
+```
+
+\
+
+
+(a) Using the rnorm() function, create a vector, x, containing 100 observations drawn from a N(0,1) distribution. This represents a feature, X.
+
+```{r}
+x <- rnorm(100)
+```
+
+(b) Using the rnorm() function, create a vector, eps, containing 100 observations drawn from a N(0,0.25) distribution i.e. a normal distribution with mean zero and variance 0.25.
+$$\epsilon \sim \mathcal{N}(0, 0.5^2)$$
+
+```{r}
+eps <- rnorm(100, sd = 0.5) # var = sd^2
+```
+
+(c) Using x and eps, generate a vector y according to the model
+
+$$y= -1 + 0.5x + \epsilon$$
+
+
+
+What is the length of the vector y? What are the values of $\beta_0$ and $\beta_1$ in this linear model?
+
+```{r}
+y <- -1 + 0.5*x + eps
+```
+El número de elementos del vector y es 100 porque el de x y eps es también 100
+```{r}
+length(y)
+```
+(d) Create a scatterplot displaying the relationship between x and y. Comment on what you observe.
+
+```{r}
+df <- data.frame(x, y)
+
+g1 <- ggplot(df, aes(x = x, y = y)) + 
+  geom_point()
+
+g1
+```
+
+* Se observa una relación linear positiva.
+* Se observa mucho ruido, hay muchos puntos dispersos.
+* Se observa un intercepto de $\approx$ -1 y pendiente $\approx$ 0.5 como lo indica la función.
+
+
+\
+
+(e) Fit a least squares linear model to predict y using x. Comment on the model obtained. How do $\hat{\beta_0}$ and $\hat{\beta_1}$ compare to $\beta_0$ and $\beta_1$?
+
+
+```{r}
+y_en_x <- lm(y ~ x)
+
+coef(y_en_x)
+```
+
+Hence:
+
+* $\hat{\beta_{0}}$ = `r coef(y_en_x)[1]` $\approx$ -1
+* $\hat{\beta_{1}}$ = `r coef(y_en_x)[2]` $\approx$ 0.5
+
+
+\
+\
+(f) Display the least squares line on the scatterplot obtained in (d). Draw the population regression line on the plot, in a different color. Use the legend() command to create an appropriate legend.
+
+
+```{r}
+g1 + 
+  geom_abline(aes(intercept = -1, slope = 0.5, col = "Poblacíon")) + 
+  geom_abline(aes(intercept = coef(y_en_x)[1], slope = coef(y_en_x)[2], col = "Modelo")) + 
+  scale_colour_manual(name = "Lineas de regresión:", values = c("red", "blue")) +
+  theme(legend.position = "bottom")
+```
+
+(g) Now fit a polynomial regression model that predicts y using x and $x^2$. Is there evidence that the quadratic term improves the model fit? Explain your answer.
+
+El modelo que se evalua es:
+$$Y = \beta_0 + \beta_1 X + \beta_2 X^2$$
+
+```{r}
+y_en_x_2 <- lm(y ~ x + I(x^2))
+```
+Y ahora se comparan los resultados de los dos modelos
+```{r}
+summary(y_en_x)
+summary(y_en_x_2)
+```
+El coeficiente $\beta_2$ =`r coef(y_en_x_2)[1]` tiene un valor p de 0.164, esto quiere decir que el $x^2$ no es estadisticamente significativo en relación con y. No hay evidencia suficiente para rechazar la hipótesis nula $\beta_2 = 0$. 
+Se observa tambien que $R^2$ ajustado aumentó de 0.4619 a 0.4672 al incluir $x^2$ aunque no hay evidencia de la relación linear de y con $x^2$.
+
+\
+
+(h) Repeat (a)–(f) after modifying the data generation process in such a way that there is less noise in the data. The model (3.39) should remain the same. You can do this by decreasing the variance of the normal distribution used to generate the error term $\epsilon$ in (b). Describe your results.
+
+$$\epsilon \sim \mathcal{N}(0, 0.1^2)$$
+
+```{R}
+set.seed(1)
+x <- rnorm(100)
+eps <- rnorm(100,mean=0,sd=sqrt(0.1))
+y <- -1+0.5*x + eps
+data <- data.frame(x, y)
+y_en_x_e_menos <- lm(y~x)
+ggplot(data, aes(x = x, y = y)) + 
+  geom_point() + 
+  geom_abline(aes(intercept = -1, slope = 0.5, col = "Población")) + 
+  geom_abline(aes(intercept = coef(y_en_x_e_menos)[1], slope = coef(y_en_x_e_menos)[2], col = "Modelo")) + 
+  scale_colour_manual(name = "Lineas de regresión:", values = c("red", "blue")) +
+  theme(legend.position = "bottom")
+```
+
+```{r}
+summary(y_en_x_e_menos)
+```
+Aquí hay menos ruido de los datos por lo que la varianza del error es menor. Los coeficientes se aproximan un poco más a los verdaderos valores -1 y 0.5 para $\beta_0$ y $\beta_1$. El $R^2$ incrementó un poco sugiriendo un mejor ajuste lineal.
+
+(i) Repeat (a)–(f) after modifying the data generation process in such a way that there is more noise in the data. The model (3.39) should remain the same. You can do this by increasing the variance of the normal distribution used to generate the error term $\epsilon$ in (b). Describe your results.
+
+$$\epsilon \sim \mathcal{N}(0, 1^2)$$
+```{r}
+set.seed(1)
+x <- rnorm(100)
+eps <- rnorm(100, sd = 1) 
+y <- -1 + 0.5*x + eps
+data <- data.frame(x, y)
+
+y_en_x_e_mas <- lm(y ~ x)
+
+ggplot(data, aes(x = x, y = y)) + 
+  geom_point() + 
+  geom_abline(aes(intercept = -1, slope = 0.5, col = "Población")) + 
+  geom_abline(aes(intercept = coef(y_en_x_e_mas)[1], slope = coef(y_en_x_e_mas)[2], col = "Modelo")) + 
+  scale_colour_manual(name = "Líneas de regresión:", values = c("red", "blue")) +
+  theme(legend.position = "bottom")
+```
+
+```{r}
+summary(y_en_x_e_mas)
+```
+Aquí hay más ruido de los datos por lo que la varianza del error es mayor. Los coeficientes aunque sigan aproximandose a -1 y 0.5 para $\beta_0$ y $\beta_1$, tiene un valor p para $\beta_1$ un poco menos significativo (de 2e-16 a 1.12e-05). El $R^2$ incrementó disminuyó sugiriendo un peor ajuste en comparación.
+\
+(j) What are the confidence intervals for $\beta_0$ and $\beta_1$ based on the original data set, the noisier data set, and the less noisy data set? Comment on your results.
+
+
+El intervalo de confianza del 95% para $\beta_i$ es:
+
+$$\hat{\beta_i} \pm t_{n-2}(0.975) \cdot SE(\hat{\beta_i})$$
+
+**Datos originales: $Var(\epsilon) = 0.5^2$**
+```{r}
+confint(y_en_x)
+```
+
+
+**Datos con más ruido: $Var(\epsilon) = 1$**
+```{r}
+confint(y_en_x_e_mas)
+```
+
+
+**Datos con menos ruido: $Var(\epsilon) = 0.1^2$**
+```{r}
+confint(y_en_x_e_menos)
+```
+* Se observa que ninguno de los intervalos contiene a 0, es decir que la hipotesis nula se rechaza para $\beta_0=0$ y tambíen para $\beta_0=0$.
+* Se observa al aumentar el ruido en los datos aumenta tambíen la amplitud del intervalo de confianza para los dos parámetros.
+* Los intervalos de confianza de $\beta_0$ tienen su centro de masa en -1 y los de $\beta_1$ en 0.5
+
+
