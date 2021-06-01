@@ -1,0 +1,333 @@
+---
+title: "Ejercicio 10"
+output: word_document
+---
+
+10. This question should be answered using the Weekly data set, which
+is part of the ISLR package. This data is similar in nature to the
+Smarket data from this chapter’s lab, except that it contains 1, 089
+weekly returns for 21 years, from the beginning of 1990 to the end of
+2010.
+
+```{r, warning=FALSE, message=FALSE}
+library(ISLR)
+data(Weekly)
+attach(Weekly)
+```
+
+Acerca del dataframe:
+
+Un marco de datos con 1089 observaciones sobre las siguientes 9 variables.
+
+Año:  El año en que se registró la observación
+
+Lag1: Porcentaje de retorno de la semana anterior
+
+Lag2: Porcentaje de rendimiento de las dos semanas anteriores
+
+Lag3: Rendimiento porcentual de las 3 semanas anteriores
+
+Lag4: Rendimiento porcentual de 4 semanas anteriores
+
+Lag5: Rendimiento porcentual de las 5 semanas anteriores
+
+Volumen: Volumen de acciones negociadas (número medio de acciones diarias negociadas en miles de millones)
+
+Hoy: Rendimiento porcentual de esta semana
+
+Dirección: Factor con niveles de bajada y subida que indica si el mercado ha tenido una rentabilidad positiva o negativa en una semana determinada
+
+
+(a) Produce some numerical and graphical summaries of the Weekly
+data. Do there appear to be any patterns?
+
+```{r}
+summary(Weekly)
+```
+```{r}
+round(cor(subset(Weekly, select = -Direction)),3)
+```
+```{r}
+par(mfrow=c(1,2))
+plot(Year,Volume,main="Year vs. Volume")
+plot(Volume, main="Index vs. Volume")
+```
+
+b) Use the full data set to perform a logistic regression with
+Direction as the response and the five lag variables plus Volume
+as predictors. Use the summary function to print the results. Do
+any of the predictors appear to be statistically significant? If so,
+which ones?
+
+
+```{r}
+glm.fit = glm(Direction ~ Lag1 + Lag2 + Lag3 + Lag4 + Lag5 + Volume, family = binomial )
+summary(glm.fit)
+```
+
+El Lag2 presenta el único coeficiente significativo pues su p-value  <  0.05, Posee un coeficiente positivo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.
+
+
+(c) Compute the confusion matrix and overall fraction of correct
+predictions. Explain what the confusion matrix is telling you
+about the types of mistakes made by logistic regression.
+
+
+
+```{r}
+# Este comando nos informa como R generara la varaible dummy para Direction
+
+contrasts(Direction)
+```
+
+
+```{r}
+# Se usa la función predict para determinar si el mercado subira o bajara, en este caso se usan los valore de entrenamiento para el calculo.
+
+glm.probs = predict(glm.fit ,type ="response")
+glm.probs[1:10]
+
+```
+```{r}
+# Convierte las probabilidades en etiquetas para saber si el mercado o bajara.
+
+len = length(glm.probs) # 1089
+glm.pred = rep("Down", len ) # Crea un vector con  1089 "Down"
+glm.pred[glm.probs > 0.5] = "Up" # Intercambia los Down por up si prob > 50%
+table(glm.pred,Direction) # Crea la matrix de confusión
+```
+La diagonal principal indica los elementos correctamente catalogados, es decir que nuestro modelo predice correctamente que 54 semanas el mercado estara a la baja y 557 a la alta.
+
+```{r}
+(54+557)
+```
+
+```{r}
+mean(glm.pred == Direction)
+```
+En otras palabras nuestro modelo clasifico correctamente 611 semanas es decir el 56.11% de las veces.
+```{r}
+100-56.11
+```
+Pero puesto que se entreno el modelo con la totalidad de los datos quiere decir que tenemos una tasa error de entrenamiento del 43.89%
+
+
+d) Now fit the logistic regression model using a training data period
+from 1990 to 2008, with Lag2 as the only predictor. Compute the
+confusion matrix and the overall fraction of correct predictions
+for the held out data (that is, the data from 2009 and 2010).
+
+
+```{r}
+train = (Year<2009)
+Weekly.2009 = Weekly[!train,]
+Direction.2009 = Direction[!train]
+dim(Weekly.2009)
+
+```
+
+```{r}
+glm.fit.2009 = glm(Direction ~ Lag2, family ="binomial", subset=train)
+summary(glm.fit.2009)
+```
+
+```{r}
+glm.probs.2009 = predict(glm.fit.2009, Weekly.2009, type="response")
+glm.probs.2009[1:10]
+```
+
+```{r}
+len.2009 = length(glm.probs.2009)
+glm.pred.2009 = rep("Down", len.2009)
+glm.pred.2009[glm.probs.2009 > 0.5] ="Up"
+table(glm.pred.2009,Direction.2009)
+```
+```{r}
+mean(glm.pred.2009 == Direction.2009) #tasa de error
+```
+
+Gracias a entrenar el modelo sobre los datos de entrenamiento los resultados de nuestras predicciones mejoran en un $6\%$, al clasificar correctamente 65 semanas es decir el $62.5\%$ de las veces, con una tasa de error del $100-62.5=37.5\%$
+
+```{r}
+56/(34+56)
+```
+Por otro lado la matriz de confusión muestra el $62.2\%$ de las semanas en las que nuestro modelo predijo correctamente una subida en el mercado.Esto sugiere una posible estrategia de compra en los días en que el modelo predice un mercado creciente
+mercado, y evitar las operaciones en los días en que se predice un descenso.
+
+
+(e) Repeat (d) using LDA.
+
+```{r}
+library(MASS)
+```
+
+```{r}
+lda.fit = lda(Direction ~ Lag2, subset=train)
+lda.fit
+```
+La salida del modelo **lda** indca que  $\hat{\pi}_1 = 0.448$ y $\hat{\pi}_2 = 0.552$ , es decir que el $44.8\%$ de los diás corresponden a aquellos en los cuales el mercado estara a la baja.Dando como resultado la ecuación.
+
+$$lda.mercados = 0.44\times Lag2$$
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+```{r}
+## class: Contiene los predictores LDA sobre el movimiento del mercado 
+
+## posterior: Es la matriz con las columnas kth que contienen la probablidad posterior
+# x: contiene los discriminares nombrados anteriormente.
+
+lda.pred = predict(lda.fit,Weekly.2009)
+names(lda.pred)
+```
+
+
+
+```{r}
+lda.class=lda.pred$class
+table(lda.class,Direction.2009)
+```
+```{r}
+mean(lda.class == Direction.2009)
+```
+
+```{r}
+## porcentaje de semanas en con subida del mercado acertadas
+
+56/(56+5)
+```
+
+
+Al aplicar un ajuste por discriminantes lineares tenemos que nuestro modelo predijo correctamente el $62.5\%$ de las semanas, con una tasa de error del $37.5\%$ y que este a su vez predijo que un correctamente un $91.8\%$ de las veces que el mercado incrementaria. 
+
+Al aplicar un umbral del $50\%$ para las predicciones posteriores de que el mercado caera tenemos que 
+```{r}
+sum(lda.pred$posterior[,1]>=0.5)
+```
+Es decir que habrá 14 semanas en las que el mercado decaerá.
+
+```{r}
+sum(lda.pred$posterior[,1]<0.5)
+```
+Y un total de 90 semanas en las que no lo hará es decir es decir se predice que para el $86.54\%$ de las semanas posteriores el mercado no bajará.
+
+De manera gráfica podemos comparar que en la probabilidades posteriores inferiores al $50\%$ que el mercado bajara se pronostica que el mercado subira.
+```{r}
+lda.pred$posterior[1:20,1]
+lda.class[1:20]
+```
+
+
+(f) Repeat (d) using QDA.
+
+```{r}
+qda.fit = qda(Direction ~ Lag2, subset = train)
+qda.fit
+```
+
+La salida del modelo **qda** indca que  $\hat{\pi}_1 = 0.448$ y $\hat{\pi}_2 = 0.552$ , es decir que el $55.2\%$ de los diás corresponden a aquellos en los cuales el mercado estara a la alsa. 
+
+```{r}
+qda.class = predict(qda.fit,Weekly.2009)$class
+table(qda.class, Direction.2009)
+```
+```{r}
+mean(qda.class == Direction.2009)
+```
+El modelo **qda**, predice correctamente el $58.65\%$ de los casos, es decir 4 puntos porcentuales menos que los modelos **glm** y **lda**, pues este fue incapaz de clasificar correctamente por lo menos una sola vez en la que el mercado estaria a la baja.
+
+(g) Repeat (d) using KNN with K = 1.
+
+```{r}
+library(class)
+```
+
+```{r}
+train.X = as.matrix(Lag2[train])
+test.X = as.matrix(Lag2[!train])
+train.Direction <- Direction[train]
+set.seed(1)
+pred.knn <- knn(train.X, test.X, train.Direction, k = 1)
+table(pred.knn, Direction.2009)
+```
+
+```{r}
+mean(pred.knn == Direction.2009)
+```
+Usando $K=1$ nuestro modelo predice correctamente la los movimiento del mercado en un $50\%$.
+
+```{r}
+set.seed(1)
+pred.knn <- knn(train.X, test.X, train.Direction, k = 3)
+table(pred.knn, Direction.2009)
+```
+```{r}
+mean(pred.knn == Direction.2009)
+```
+Al disminuir la flexibilidad del modelo al aumentar a $K=3$, vemos que este se ajusta un poco mejor prediciendo correctamente el $54.8\%$ de las veces el movimiento del mercado.
+
+(h) Which of these methods appears to provide the best results on
+this data?
+
+En este caso particular para los mejores modelos para predecir el comportamiento del mercado están dados por la regresión logistica y por el analísis linear de discriminantes pues estos otorgan clasifican correctamente el $62.5\%$ de los movimientos del mercado. con una tasa de error de apenas el $37.5\%$, mientras que el modelo de discriminante cuadratico tiene una tasa de error del $41.35\%$ y el KNN con $K = 3$ tiene una tasa de error del $45.2\%$.
+
+(i) Experiment with different combinations of predictors, including
+possible transformations and interactions, for each of the
+methods. Report the variables, method, and associated confusion
+matrix that appears to provide the best results on the held
+out data. Note that you should also experiment with values for
+K in the KNN classifier.
+
+
+```{r}
+# Logistic regression with Direction ~ Lag1 + Lag2
+fit.glm3 <- glm(Direction ~ Lag1 + Lag2, data = Weekly, family = binomial, subset = train)
+probs3 <- predict(fit.glm3, Weekly.2009, type = "response")
+pred.glm3 <- rep("Down", length(probs3))
+pred.glm3[probs3 > 0.5] = "Up"
+table(pred.glm3, Direction.2009)
+```
+```{r}
+mean(pred.glm3 == Direction.2009)
+```
+```{r}
+# LDA with Direction ~ Lag1 + Lag2
+fit.lda2 <- lda(Direction ~ Lag1 + Lag2, data = Weekly, subset = train)
+pred.lda2 <- predict(fit.lda2, Weekly.2009)
+lda.class2=pred.lda2$class
+table(lda.class2, Direction.2009)
+```
+```{r}
+mean(pred.lda2$class == Direction.2009)
+```
+
+```{r}
+# QDA with Direction ~ Lag1 + Lag2
+fit.qda2 <- qda(Direction ~ Lag1 + Lag2, data = Weekly, subset = train)
+pred.qda2 <- predict(fit.qda2, Weekly.2009)
+table(pred.qda2$class, Direction.2009)
+```
+```{r}
+mean(pred.qda2$class == Direction.2009)
+```
+```{r}
+# KNN k =5
+pred.knn2 <- knn(train.X, test.X, train.Direction, k = 5)
+table(pred.knn2, Direction.2009)
+```
+```{r}
+mean(pred.knn2 == Direction.2009)
+```
+
+```{r}
+# KNN k = 10
+pred.knn3 <- knn(train.X, test.X, train.Direction, k = 10)
+table(pred.knn3, Direction.2009)
+```
+
+```{r}
+mean(pred.knn3 == Direction.2009)
+```
+
+
+
