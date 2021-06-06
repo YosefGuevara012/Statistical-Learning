@@ -1,0 +1,258 @@
+---
+output: word_document
+---
+
+13. Using the **Boston** data set, fit classification models in order to predict
+whether a given suburb has a crime rate above or below the median.
+Explore logistic regression, LDA, and KNN models using various subsets
+of the predictors. Describe your findings.
+
+```{r}
+library("ISLR")
+library("MASS")
+data(Boston)
+```
+
+
+Acerca del dataframe:
+
+crim: tasa de criminalidad per cápita por ciudad.
+
+zn: proporción de suelo residencial con lotes de más de 25.000 pies cuadrados.
+
+indus:proporción de acres comerciales no minoristas por ciudad.
+
+chas Variable ficticia del río Charles (= 1 si el tramo limita con el río; 0 en caso contrario).
+
+nox: concentración de óxidos de nitrógeno (partes por 10 millones).
+
+rm: número medio de habitaciones por vivienda.
+
+age: proporción de unidades ocupadas por sus propietarios construidas antes de 1940.
+
+dis: media ponderada de las distancias a cinco centros de empleo de Boston.
+
+rad: índice de accesibilidad a las carreteras radiales.
+
+tax: tasa de impuesto sobre la propiedad de valor total por 10.000 dólares.
+
+ptratio: proporción de alumnos por profesor por ciudad.
+
+black: 1000(Bk - 0,63)^2 donde Bk es la proporción de negros por ciudad.
+
+lstat: Porcentaje población estratos bajos (porcentaje).
+
+medv: valor medio de las viviendas ocupadas por sus propietarios, en 1000 dólares.
+
+Puesto que se va analizar sobre la variable crimen se generá un summary de esta.
+
+```{r}
+summary(Boston$crim)
+```
+Se separan los datos mediante la mediana, aquellos valores superiores a la mediana de la criminalidad son clasificados como 1 los demás como 0.
+
+```{r}
+
+c.bool <- ifelse(Boston$crim > median(Boston$crim), 1, 0)
+datos <- data.frame(Boston, c.bool)
+round(cor(Boston),3)
+```
+Para trabajar sobre los datos de la criminalidad se decide trabajar sobre aquellos que presentan las 8 correlaciones más altas con la variable criminalidad.
+
+```{r}
+sort(cor(Boston)[1,],decreasing = T)
+
+```
+Separados por los siguiente grupos de variables:
+
+A. rad + tax + lstat + nox
+B. indus + age + ptratio + chas 
+
+
+Para crear los datos de entrenamiento y de prueba se creara el subset train que contendra el $80\%$ de los datos del dataset, los demás serán tomados para el subset test.
+
+```{r}
+round(nrow(datos)*.8,0)
+```
+
+```{r}
+# Train y test data
+train <- subset(datos[1:405,])
+test <- subset(datos[406:nrow(datos),])
+```
+
+Se realiza el ajuste del modelo con el grupo de Varibales A:
+
+```{r}
+glm.fit <- glm(c.bool~ rad + tax +lstat +nox, data=train, family=binomial)
+summary(glm.fit)
+```
+
+Se descartan las variables lstat y tax, pues su p-value > 0.05, por lo que se vuelve a ajustar el modelo solo con rad y nox.
+
+```{r}
+glm.fit <- glm(c.bool~rad+nox, data=train, family=binomial)
+summary(glm.fit)
+```
+
+```{r}
+logit.prob <- predict(glm.fit, test, type="response")
+logit.pred <- ifelse(logit.prob > 0.5, 1, 0)
+table(logit.pred,test$c.bool)
+cat("\n")
+pc <- round(mean(logit.pred == test$c.bool)*100,2)
+te <- round((1-mean(logit.pred == test$c.bool))*100,2)
+cbind(pc,te)
+```
+El modelo que ocupa las variables rad + nox clasifica correctamente 91 suburbios y  si este suburbio esta por encima de la tasa de criminalidad de la mediana el $90.1\%$ de las veces, con una tasa de error del $9.9\%$.
+
+Se realiza el ajuste del modelo con el grupo de Varibales B:
+
+
+```{r}
+glm.fit <- glm(c.bool~indus+age+ptratio+chas, data=train, family=binomial)
+summary(glm.fit)
+```
+
+Se descartan las variables ptratio y chas, pues su p-value > 0.05, por lo que se vuelve a ajustar el modelo solo con indus y age.
+
+```{r}
+glm.fit <- glm(c.bool~indus+age, data=train, family=binomial)
+summary(glm.fit)
+```
+
+```{r}
+logit.prob <- predict(glm.fit, test, type="response")
+logit.pred <- ifelse(logit.prob > 0.5, 1, 0)
+table(logit.pred,test$c.bool)
+cat("\n")
+pc <- round(mean(logit.pred == test$c.bool)*100,2)
+te <- round((1-mean(logit.pred == test$c.bool))*100,2)
+cbind(pc,te)
+```
+El modelo que ocupa las variables indus + age clasifica correctamente 82 suburbios y  si este suburbio esta por encima de la tasa de criminalidad de la mediana el $82.12\%$ de las veces, con una tasa de error del $17.82\%$.
+
+```{r}
+# LDA models
+
+lda.fit <- lda(c.bool~rad+nox, data=train)
+lda.fit
+cat("\n")
+lda.fit.pred <- predict(lda.fit, test)$class
+table(lda.fit.pred,test$c.bool)
+cat("\n")
+pc <- round(mean(lda.fit.pred == test$c.bool)*100,2)
+te <- round((1-mean(lda.fit.pred == test$c.bool))*100,2)
+cbind(pc,te)
+```
+
+El modelo que ocupa las variables rad + nox clasifica correctamente 91 suburbios y  si este suburbio esta por encima de la tasa de criminalidad de la mediana el $90.1\%$ de las veces, con una tasa de error del $9.9\%$.Es decir que el $58.76\%$ de las suburbios corresponden a aquellos en los cuales la criminalidad estará por debajo de la mediana.
+
+```{r}
+# LDA models
+
+lda.fit <- lda(c.bool~indus+age, data=train)
+lda.fit
+cat("\n")
+lda.fit.pred <- predict(lda.fit, test)$class
+table(lda.fit.pred,test$c.bool)
+cat("\n")
+pc <- round(mean(lda.fit.pred == test$c.bool)*100,2)
+te <- round((1-mean(lda.fit.pred == test$c.bool))*100,2)
+cbind(pc,te)
+```
+El modelo que ocupa las variables indus + age clasifica correctamente 84 suburbios y  si este suburbio esta por encima de la tasa de criminalidad de la mediana el $83.17\%$ de las veces, con una tasa de error del $16.83\%$.Es decir que el $58.76\%$ de las suburbios corresponden a aquellos en los cuales la criminalidad estará por debajo de la mediana.
+
+```{r}
+# QDA models
+qda.fit <- qda(c.bool~rad+nox, data=train)
+qda.fit
+cat("\n")
+qda.fit.pred <- predict(qda.fit, test)$class
+table(qda.fit.pred,test$c.bool)
+cat("\n")
+pc <- round(mean(qda.fit.pred == test$c.bool)*100,2)
+te <- round((1-mean(qda.fit.pred == test$c.bool))*100,2)
+cbind(pc,te)
+```
+El modelo que ocupa las variables rad + nox clasifica correctamente 86 suburbios y  si este suburbio esta por encima de la tasa de criminalidad de la mediana el $85.15\%$ de las veces, con una tasa de error del $14.85\%$.Es decir que el $58.76\%$ de las suburbios corresponden a aquellos en los cuales la criminalidad estará por debajo de la mediana.
+
+```{r}
+# QDA models
+qda.fit <- qda(c.bool~indus+age, data=train)
+qda.fit
+cat("\n")
+qda.fit.pred <- predict(qda.fit, test)$class
+table(qda.fit.pred,test$c.bool)
+cat("\n")
+pc <- round(mean(qda.fit.pred == test$c.bool)*100,2)
+te <- round((1-mean(qda.fit.pred == test$c.bool))*100,2)
+cbind(pc,te)
+```
+El modelo que ocupa las variables indus + age clasifica correctamente 82 suburbios y  si este suburbio esta por encima de la tasa de criminalidad de la mediana el $81.19\%$ de las veces, con una tasa de error del $18.81\%$.Es decir que el $58.76\%$ de las suburbios corresponden a aquellos en los cuales la criminalidad estará por debajo de la mediana.
+
+A continuación se realizara el análisis por KNN de del grupo de variables rad + nox:
+
+```{r}
+library(MASS)
+train.X1 <- cbind(train$rad, train$nox)
+test.X1 <- cbind(test$rad, test$nox)
+set.seed(1)
+knn1.pred <- knn(train.X1, test.X1, train$c.bool, k=1)
+print("K=1")
+mean(knn1.pred == test$c.bool)*100
+knn1.pred <- knn(train.X1, test.X1, train$c.bool, k=5)
+print("K=5")
+mean(knn1.pred == test$c.bool)*100
+knn1.pred <- knn(train.X1, test.X1, train$c.bool, k=10)
+print("K=10")
+mean(knn1.pred == test$c.bool)*100
+knn1.pred <- knn(train.X1, test.X1, train$c.bool, k=20)
+print("K=20")
+mean(knn1.pred == test$c.bool)*100
+knn1.pred <- knn(train.X1, test.X1, train$c.bool, k=50)
+print("K=50")
+mean(knn1.pred == test$c.bool)*100
+knn1.pred <- knn(train.X1, test.X1, train$c.bool, k=100)
+print("K=100")
+mean(knn1.pred == test$c.bool)*100
+knn1.pred <- knn(train.X1, test.X1, train$c.bool, k=200)
+print("K=200")
+mean(knn1.pred == test$c.bool)*100
+```
+Se aprecia que para las variables rad + nox el modelo clasifica correctamente los suburbios cuando su criminalidad esta por encima de la media el $92.08\%$ de las veces desde $k=1...k=50$, donde sufre un cambia de 5 puntos porcentuales con $k=100$ hasta lograr el $97.03\%$ de aciertos, y decreciendo al el $68.32\%$ cuando $k=200$
+
+
+A continuación se realizara el análisis por KNN de del grupo de variables indus + age:
+
+```{r}
+
+train.X1 <- cbind(train$indus, train$age)
+test.X1 <- cbind(test$indus, test$age)
+set.seed(1)
+knn1.pred <- knn(train.X1, test.X1, train$c.bool, k=1)
+print("K=1")
+mean(knn1.pred == test$c.bool)*100
+knn1.pred <- knn(train.X1, test.X1, train$c.bool, k=5)
+print("K=5")
+mean(knn1.pred == test$c.bool)*100
+knn1.pred <- knn(train.X1, test.X1, train$c.bool, k=10)
+print("K=10")
+mean(knn1.pred == test$c.bool)*100
+knn1.pred <- knn(train.X1, test.X1, train$c.bool, k=20)
+print("K=20")
+mean(knn1.pred == test$c.bool)*100
+knn1.pred <- knn(train.X1, test.X1, train$c.bool, k=50)
+print("K=50")
+mean(knn1.pred == test$c.bool)*100
+knn1.pred <- knn(train.X1, test.X1, train$c.bool, k=100)
+print("K=100")
+mean(knn1.pred == test$c.bool)*100
+knn1.pred <- knn(train.X1, test.X1, train$c.bool, k=200)
+print("K=200")
+mean(knn1.pred == test$c.bool)*100
+```
+
+
+Se aprecia que para las variables indus + age el modelo clasifica correctamente los suburbios cuando su criminalidad esta por encima de la media el $81.20\%$ cuando $k=1$ y luego decrece lentamente para $k>1$
+
