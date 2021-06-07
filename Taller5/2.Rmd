@@ -1,0 +1,51 @@
+---
+output: html_notebook
+---
+
+```{r}
+## Esta funcion calcula la probabilidad de que una observación jth 
+## sea seleccionada por el muestreo boostrap
+
+probabilidad <- function(n){
+  
+  1 - (1-1/n)^n
+  
+}
+
+```
+
+
+```{r}
+n <- rep(1:50)
+
+prob <- sapply(n, probabilidad)
+
+plot(prob,main="Convergencia de las probabilidades.", 
+     xlab="Observación", ylab="Probabilidad", col="red")
+abline(h=0.6321, col="blue")
+legend("topright", legend=c("Probabilidad","Convergencia"), lty = 1, lwd = 2, col=c("red", "blue"), bty="n")
+
+```
+
+```{r}
+n <- rep(1:100000)
+
+prob <- sapply(n, probabilidad)
+
+plot(prob,main="Probabilidad seleccion observación jth.", 
+     xlab="Observación", ylab="Probabilidad", col="red")
+
+```
+
+```{r}
+
+store=rep (NA , 10000)
+
+for (i in 1:10000) {
+  store[i]=sum(sample (1:100 , rep =TRUE)==4) >0
+}
+
+mean(store)
+
+```
+
