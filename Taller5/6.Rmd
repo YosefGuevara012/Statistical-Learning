@@ -1,5 +1,5 @@
 ---
-output: Word_document
+output: word_document
 ---
 
 
@@ -33,14 +33,21 @@ glm.fit = glm(default ~ income + balance, family=binomial)
 summary(glm.fit)
 
 ```
+Se puede ver con claridad que tanto **income** como **balance** son variables predictoras significativas para este modelo pues p-value < .05; sin embargo tanto la **desviación residual** como el **AIC**, son muy grandes, lo cual es un indicativo que el modelo entrenado no es el más el adecuado.
+
+
 b) Write a function, **boot.fn()**, that takes as input the Default data
 set as well as an index of the observations, and that outputs
 the coefficient estimates for income and balance in the multiple
 logistic regression model.
 
 
+
 ```{r}
-set.seed(13)
+
+##Se establece una semill para que los resultados siempre sean replicables.
+
+set.seed(13) 
 boot.fn <- function(data, index) {
     fit <- glm(default ~ income + balance, data = data, family = "binomial", subset = index)
     return (coef(fit))
@@ -57,14 +64,36 @@ library(boot)
 boot(Default, boot.fn, 1000)
 ```
 
-The bootstrap estimates of the standard errors for the coefficients β0, β1 and β2 are respectively 0.4239, 4.583 x 10^(-6) and 2.268 x 10^(-4).
+Los estimados de los errores estandar generados por el boostrap son:
+
+ + $\hat{\beta_0} = 4.11e-01$
+ + $\hat{\beta_1} = 4.57e-06$
+ + $\hat{\beta_2} = 2.16e-04$
+
 
 (d) Comment on the estimated standard errors obtained using the
 **glm()** function and using your bootstrap function.
 
-The estimated standard errors obtained by the two methods are pretty close, so the bootstrap method is efficient.
+Al comparar los resultados de los errores estándar estimados 
+para los puntos (c) y (d),vemos que son muy cercanos entre sí, 
+por lo cual se puede decir que el modelo boostrap es eficiente. 
 
-Standard error estimates are pretty close using glm summary function versus bootstrap with R=100
+La cercania entre estos valores es cada vez más notoría al incrementar
+el numero de observaciones utilizadas en el boostrap como se puede ver
+a continuación.
 
-* `income`: 4.985e-06 with glm summary, 4.128e-06 using bootstrap
-* `balance`: 2.274e-04 with glm summary, 2.106e-04 using bootstrap
+
+```{r}
+## Boostrap con 100 datos
+
+set.seed(13)
+library(boot)
+boot(Default, boot.fn, 100)
+```
+
+```{r}
+## Boostrap con 5000 datos
+set.seed(13)
+library(boot)
+boot(Default, boot.fn, 5000)
+```
