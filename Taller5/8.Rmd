@@ -1,0 +1,105 @@
+---
+output: word_document
+---
+
+8. We will now perform cross-validation on a simulated data set.
+
+(a) Generate a simulated data set as follows
+
+```{r}
+set.seed(1)
+y=rnorm (100)
+x=rnorm (100)
+y=x-2*x^2+ rnorm (100)
+```
+
+In this data set, what is **n** and what is **p**? Write out the model
+used to generate the data in equation form.
+
+Tenemos que $n=100$ y $p=2$, el modelo usado para generar esta data es:
+
+$$y=x -2x^2 +\varepsilon$$
+$$\varepsilon \sim N(0,1)$$
+
+(b) Create a scatterplot of X against Y . Comment on what you find.
+
+```{r}
+
+plot(x,y, main="x vs. y")
+
+```
+
+(c) Set a random seed, and then compute the LOOCV errors that
+result from fitting the following four models using least squares:
+
+```{r}
+library(boot)
+```
+
+
+```{r}
+
+Data <- as.data.frame(cbind(x, y))
+set.seed(1)
+glm.fit1 <- glm(y ~ x)
+cv.glm(Data, glm.fit1)$delta[1]
+```
+```{r}
+glm.fit2 <- glm(y ~ poly(x, 2))
+cv.glm(Data, glm.fit2)$delta[1]
+```
+
+```{r}
+glm.fit3 <- glm(y ~ poly(x, 3))
+cv.glm(Data, glm.fit3)$delta[1]
+```
+
+
+```{r}
+glm.fit4 <- glm(y ~ poly(x, 4))
+cv.glm(Data, glm.fit4)$delta[1]
+```
+
+
+(d) Repeat (c) using another random seed, and report your results.
+Are your results the same as what you got in (c)? Why?
+
+
+```{r}
+
+set.seed(10)
+glm.fit1 <- glm(y ~ x)
+cv.glm(Data, glm.fit1)$delta[1]
+```
+```{r}
+glm.fit2 <- glm(y ~ poly(x, 2))
+cv.glm(Data, glm.fit2)$delta[1]
+```
+
+```{r}
+glm.fit3 <- glm(y ~ poly(x, 3))
+cv.glm(Data, glm.fit3)$delta[1]
+```
+
+
+```{r}
+glm.fit4 <- glm(y ~ poly(x, 4))
+cv.glm(Data, glm.fit4)$delta[1]
+```
+The results above are identical to the results obtained in (c) since LOOCV evaluates n folds of a single observation.
+
+(e) Which of the models in (c) had the smallest LOOCV error? Is
+this what you expected? Explain your answer.
+
+We may see that the LOOCV estimate for the test MSE is minimum for “fit.glm.2”, this is not surprising since we saw clearly in (b) that the relation between “x” and “y” is quadratic.
+
+(f) Comment on the statistical significance of the coefficient estimates
+that results from fitting each of the models in (c) using
+least squares. Do these results agree with the conclusions drawn
+based on the cross-validation results?
+
+```{r}
+summary(glm.fit4)
+
+```
+The p-values show that the linear and quadratic terms are statistically significants and that the cubic and 4th degree terms are not statistically significants. This agree strongly with our cross-validation results which were minimum for the quadratic model.
