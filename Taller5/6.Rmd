@@ -66,9 +66,9 @@ boot(Default, boot.fn, 1000)
 
 Los estimados de los errores estandar generados por el boostrap son:
 
- + $\hat{\beta_0} = 4.11e-01$
- + $\hat{\beta_1} = 4.57e-06$
- + $\hat{\beta_2} = 2.16e-04$
+ + Std. error para $\hat{\beta_0} = 4.11e-01$
+ + Std. error para $\hat{\beta_1} = 4.57e-06$
+ + Std. error para $\hat{\beta_2} = 2.16e-04$
 
 
 (d) Comment on the estimated standard errors obtained using the
@@ -97,3 +97,11 @@ set.seed(13)
 library(boot)
 boot(Default, boot.fn, 5000)
 ```
+La siguiente tabla resumen nos ayuda a visualizarlos resultados anteriores. 
+
+
+| Std. Error para | 100      | 1000     | 5000      | Todos los datos |
+|-----------------|----------|----------|-----------|-----------------|
+| $\hat{\beta}_0$ | 4.21e-01 | 4.11e-01 | 4.34e-0.1 | 4.34e-01        |
+| $\hat{\beta}_1$ | 5.01e-06 | 4.57e-06 | 4.79e-06  | 4.98e-06        |
+| $\hat{\beta}_2$ | 2.17e-04 | 2.16e-04 | 2.28e-04  | 2.27e-04        |

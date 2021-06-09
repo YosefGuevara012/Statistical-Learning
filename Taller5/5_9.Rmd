@@ -1,0 +1,244 @@
+---
+output: word_document
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+library(dplyr)
+library(ISLR)
+library(corrplot)
+library(car)
+library(class)
+library(MASS)
+library(boot)
+```
+***PUNTO CINCO***
+
+5. In Chapter 4, we used logistic regression to predict the probability of default using income and balance on the Default data set. We will now estimate the test error of this logistic regression model using the validation set approach. Do not forget to set a random seed before beginning your analysis.
+
+a)  Fit a logistic regression model that uses income and balance to predict default.
+
+```{r}
+attach(Default)
+names(Default)
+set.seed(1)
+mod_1 <- glm(default ~ income + balance, data = Default, family = "binomial")
+summary(mod_1) 
+```
+
+b) Using the validation set approach, estimate the test error of this model. In order to do this, you must perform the following steps:
+
+i. Split the sample set into a training set and a validation set.
+
+```{r}
+train <- sample(nrow(Default), nrow(Default)*0.5)
+```
+
+ii. Fit a multiple logistic regression model using only the training observations.
+
+```{r}
+mod_1 <- glm(default ~ income + balance, data = Default, family = "binomial", subset = train)
+summary(mod_1)
+```
+
+
+iii. Obtain a prediction of default status for each individual in the validation set by computing the posterior probability of default for that individual, and classifying the individual to the default category if the posterior probability is greater than 0.5
+
+```{r}
+probs <- predict(mod_1, newdata = Default[-train, ], type = "response")
+pred.mod1 <- rep("No", length(probs))
+pred.mod1[probs > 0.5] <- "Yes"
+```
+
+iv. Compute the validation set error, which is the fraction of the observations in the validation set that are misclassified
+
+```{r}
+pred <- mean(pred.mod1 != Default[-train, ]$default)
+pred
+```
+
+
+c)  Repeat the process in (b) three times, using three different splits of the observations into a training set and a validation set. Comment on the results obtained
+
+```{r}
+set.seed(2)
+train <- sample(nrow(Default), nrow(Default)*0.5)
+mod_2 <- glm(default ~ income + balance, data = Default, family = "binomial", subset = train)
+summary(mod_2)
+
+probs <- predict(mod_2, newdata = Default[-train, ], type = "response")
+pred.mod2 <- rep("No", length(probs))
+pred.mod2[probs > 0.5] <- "Yes"
+
+pred2 <- mean(pred.mod2 != Default[-train, ]$default)
+pred2
+
+```
+
+```{r}
+set.seed(3)
+train <- sample(nrow(Default), nrow(Default)*0.5)
+mod_3 <- glm(default ~ income + balance, data = Default, family = "binomial", subset = train)
+summary(mod_3)
+
+probs <- predict(mod_3, newdata = Default[-train, ], type = "response")
+pred.mod3 <- rep("No", length(probs))
+pred.mod3[probs > 0.5] <- "Yes"
+
+pred3 <- mean(pred.mod3 != Default[-train, ]$default)
+pred3
+```
+
+Se logra observar que la tasa de error es variable dependiendo del conjunto de observaciones de los datos de entrenamiento y del conjunto de observaciones para la validación. Sin embargo las variaciones no son muy grandes, todas se encuentran entre 2.3% y 2.6%
+
+
+d) Now consider a logistic regression model that predicts the probability of default using income, balance, and a dummy variable for student. Estimate the test error for this model using the validation set approach. Comment on whether or not including a dummy variable for student leads to a reduction in the test error rate.
+
+```{r}
+set.seed(1)
+train <- sample(nrow(Default), nrow(Default)*0.5)
+mod_4 <- glm(default ~ income + balance + student, data = Default, family = "binomial", subset = train)
+pred.mod4 <- rep("No", length(probs))
+probs <- predict(mod_4, newdata = Default[-train, ], type = "response")
+pred.mod4[probs > 0.5] <- "Yes"
+mean(pred.mod4 != Default[-train, ]$default)
+```
+Incluir la variable Student dentro del modelo no modifica la tasa de error de prueba.
+
+
+
+7. In Sections 5.3.2 and 5.3.3, we saw that the cv.glm() function can be used in order to compute the LOOCV test error estimate. Alternatively, one could compute those quantities using just the glm() and predict.glm() functions, and a for loop. You will now take this approach in order to compute the LOOCV error for a simple logistic regression model on the Weekly data set. Recall that in the context of classification problems, the LOOCV error is given in (5.4).
+
+a) Fit a logistic regression model that predicts Direction using Lag1 and Lag2
+
+```{r}
+data(Weekly)
+attach(Weekly)
+names(Weekly)
+set.seed(1)
+mod1 <- glm(Direction ~ Lag1 + Lag2, data=Weekly, family=binomial)
+summary(mod1)
+```
+b) Fit a logistic regression model that predicts Direction using Lag1 and Lag2 using all but the first observation.
+
+```{r}
+set.seed(1)
+mod2 <- glm(Direction ~ Lag1 + Lag2, data = Weekly[-1, ], family = "binomial")
+summary(mod2)
+```
+c)  Use the model from (b) to predict the direction of the first observation. You can do this by predicting that the first observation will go up if P(Direction="Up"|Lag1, Lag2) > 0.5. Was this observation correctly classified?
+
+```{r}
+ifelse(predict(mod2, Weekly[1,], type="response")>0.5, "Up", "Down")
+Weekly[1,]$Direction
+```
+La primera predicción estpa clasificada de forma incorrecta ya que debería ser UP según los niveles o categorías establecidas.
+
+
+d) Write a for loop from i = 1 to i = n, where n is the number of observations in the data set, that performs each of the following steps:
+
+
+i. Fit a logistic regression model using all but the ith observation to predict “Direction” using “Lag1” and “Lag2”.
+
+ii. Compute the posterior probability of the market moving up for the ith observation.
+
+iii. Use the posterior probability for the ith observation in order to predict whether or not the market moves up.
+
+iv. Determine whether or not an error was made in predicting the direction for the ith observation. If an error was made, then indicate this as a 1, and otherwise indicate it as a 0.
+```{r}
+set.seed(1)
+loocv.err <- rep(0,nrow(Weekly))
+for (i in 1:nrow(Weekly)) {
+  mod <- glm(Direction ~ Lag1 + Lag2, data=Weekly[-i,], family=binomial)
+  mod_pred <- ifelse(predict(mod, Weekly[1,], type="response")>0.5, "Up", "Down")
+  loocv.err[i] <- ifelse(Weekly[i,]$Direction==mod_pred, 0, 1)
+}
+str(loocv.err)
+```
+
+e) Take the average of the n numbers obtained in (d)iv in order to obtain the LOOCV estimate for the test error. Comment on the results.
+```{r}
+mean(loocv.err)
+```
+
+La estimación para la tase de error de prueba es de 44.4%.
+
+***PUNTO NUEVE***
+
+9. We will now consider the Boston housing data set, from the MASS library.
+
+a)  Based on this data set, provide an estimate for the population mean of medv. Call this estimate μ.
+
+```{r}
+data("Boston")
+attach(Boston)
+names(Boston)
+mu.hat <- mean(medv)
+mu.hat
+```
+b) Provide an estimate of the standard error of μ. Interpret this result.
+
+```{r}
+medv.se <- sd(Boston$medv)/sqrt(nrow(Boston))
+medv.se
+```
+c) Now estimate the standard error of μ using the bootstrap. How does this compare to your answer from (b)?
+
+```{r}
+set.seed(1)
+mean.fn <- function(var, id) {
+  return(mean(var[id]))
+}
+boot.res <- boot(Boston$medv, mean.fn, R=100)
+boot.res
+```
+El error estimado Boostrap es 0.36042 el cual es menor que el encontrado en el literal (b) (pasa de 0.408 a 0.360 con el método Boostrap)
+
+d)Based on your bootstrap estimate from (c), provide a 95 % confidence interval for the mean of medv. Compare it to the results obtained using t.test(Boston$medv)
+
+```{r}
+t.test(medv)
+IC.mu.hat <- c(22.53 - 2 * 0.360419, 22.53 + 2 * 0.360419)
+IC.mu.hat
+```
+El intervalo con un nivel de confianza del 95% será (21.809, 23.251)
+
+
+e) Based on this data set, provide an estimate, μmed, for the median value of medv in the population.
+
+```{r}
+med.hat <- median(medv)
+med.hat
+```
+
+
+f) We now would like to estimate the standard error of ˆ μmed. Unfortunately, there is no simple formula for computing the standard error of the median. Instead, estimate the standard error of the median using the bootstrap. Comment on your findings.
+
+```{r}
+set.seed(1)
+median.fn <- function(var, id) {
+  return(median(var[id]))
+}
+(boot.res <- boot(Boston$medv, median.fn, R=100))
+```
+Se evidencia que el resiltado es 21.2 igual que en el literal anterior, con un error estandar de 0.36.
+
+
+g)  Based on this data set, provide an estimate for the tenth percentile of medv in Boston suburbs. Call this quantity μ0.1. (You can use the quantile() function.)
+
+```{r}
+medv.qt <- quantile(Boston$medv, 0.1)
+medv.qt
+```
+
+
+h) Use the bootstrap to estimate the standard error of μ0.1. Comment on your findings.
+
+```{r}
+set.seed(1)
+quantil_10.fn <- function(var, id) {
+  return(quantile(var[id], 0.1))
+}
+(boot.res <- boot(Boston$medv, quantil_10.fn, R=100))
+```
+El error estimado es de 0.537

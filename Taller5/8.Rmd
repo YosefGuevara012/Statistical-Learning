@@ -25,39 +25,55 @@ $$\varepsilon \sim N(0,1)$$
 
 ```{r}
 
-plot(x,y, main="x vs. y")
+plot(x,y, main="x vs. y", col="blue")
 
 ```
+Se observa claramente una relación curva entre **x** y **y** 
 
 (c) Set a random seed, and then compute the LOOCV errors that
 result from fitting the following four models using least squares:
 
 ```{r}
 library(boot)
-```
-
-
-```{r}
-
+### se crea un data frame para facilitar la manipulación de los datos
 Data <- as.data.frame(cbind(x, y))
 set.seed(1)
-glm.fit1 <- glm(y ~ x)
-cv.glm(Data, glm.fit1)$delta[1]
 ```
+
+$$i. Y= \beta_0 + \beta_1X + \varepsilon$$
+
+```{r}
+
+glm.fit1 <- glm(y ~ x)
+cv.error1<-cv.glm(Data, glm.fit1)$delta
+cv.error1[1]
+```
+La función cv.error<-cv.glm() produce una lista con varios componentes. Los dos
+números del vector delta contienen los resultados de la validación cruzada. En este caso los números son idénticos (hasta dos decimales) y corresponden
+a la estadística LOOCV dada en.xxxxx
+
+$$ii. Y= \beta_0 + \beta_1X +  \beta_2X^2 + \varepsilon$$
+
 ```{r}
 glm.fit2 <- glm(y ~ poly(x, 2))
-cv.glm(Data, glm.fit2)$delta[1]
+cv.error2<-cv.glm(Data, glm.fit2)$delta
+cv.error2[1]
 ```
+
+$$iii. Y= \beta_0 + \beta_1X  + \beta_2X^2 + \beta_3X^3 + \varepsilon$$
 
 ```{r}
 glm.fit3 <- glm(y ~ poly(x, 3))
-cv.glm(Data, glm.fit3)$delta[1]
+cv.error3<-cv.glm(Data, glm.fit3)$delta
+cv.error3[1]
 ```
 
+$$iv. Y= \beta_0 + \beta_1X  + \beta_2X^2 + \beta_3X^3 + \beta_4X^4 + \varepsilon$$
 
 ```{r}
 glm.fit4 <- glm(y ~ poly(x, 4))
-cv.glm(Data, glm.fit4)$delta[1]
+cv.error4<-cv.glm(Data, glm.fit4)$delta
+cv.error4[1]
 ```
 
 
@@ -69,29 +85,37 @@ Are your results the same as what you got in (c)? Why?
 
 set.seed(10)
 glm.fit1 <- glm(y ~ x)
-cv.glm(Data, glm.fit1)$delta[1]
+cv.error1<-cv.glm(Data, glm.fit1)$delta
+cv.error1[1]
 ```
 ```{r}
 glm.fit2 <- glm(y ~ poly(x, 2))
-cv.glm(Data, glm.fit2)$delta[1]
+cv.error2<-cv.glm(Data, glm.fit2)$delta
+cv.error2[1]
 ```
 
 ```{r}
 glm.fit3 <- glm(y ~ poly(x, 3))
-cv.glm(Data, glm.fit3)$delta[1]
+cv.error3<-cv.glm(Data, glm.fit3)$delta
+cv.error3[1]
 ```
 
 
 ```{r}
 glm.fit4 <- glm(y ~ poly(x, 4))
-cv.glm(Data, glm.fit4)$delta[1]
+cv.error4<-cv.glm(Data, glm.fit4)$delta
+cv.error4[1]
 ```
-The results above are identical to the results obtained in (c) since LOOCV evaluates n folds of a single observation.
+
+Los resultados son idénticos debido a que LOOCV solo usa una observación para validar el modelo, las demás observaciones son usadas para el entrenamiento.
 
 (e) Which of the models in (c) had the smallest LOOCV error? Is
 this what you expected? Explain your answer.
 
-We may see that the LOOCV estimate for the test MSE is minimum for “fit.glm.2”, this is not surprising since we saw clearly in (b) that the relation between “x” and “y” is quadratic.
+
+El error cuadrático medio **MSE**  más pequeño corresponde estimado por el LOOCV el modelo **glm.fit2**, puesto que como se establecido al durante la simulación del ejercicio la relación entre las variable es cuadrática.
+
+
 
 (f) Comment on the statistical significance of the coefficient estimates
 that results from fitting each of the models in (c) using
@@ -102,4 +126,6 @@ based on the cross-validation results?
 summary(glm.fit4)
 
 ```
-The p-values show that the linear and quadratic terms are statistically significants and that the cubic and 4th degree terms are not statistically significants. This agree strongly with our cross-validation results which were minimum for the quadratic model.
+
+Gracia al p-value se identifica que solo los coeficientes $\beta_1$ y $\beta_2$, que acompañan a los términos linear y cuadratico respectivamente son significativos. Tanto el **AIC** como la **deviación residual muestran** un buen ajuste del modelo dado que sus valores no son muy grande.
+
