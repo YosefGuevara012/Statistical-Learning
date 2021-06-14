@@ -1,0 +1,82 @@
+---
+output: word_document
+---
+
+6. We will now explore (6.12) and (6.13) further.
+
+
+
+(a) Consider (6.12) with $p = 1$. For some choice of y1 and $\lambda > 0$,
+plot (6.12) as a function of $\beta_1$. Your plot should confirm that
+(6.12) is solved by (6.14).
+
+(6.12)
+
+$$\sum_{i=1}^{p}\left ( y_j - \beta_j \right )^2 + \lambda\sum_{j=1}^{p}\beta_j^2$$
+
+```{r}
+y <- 5
+lambda <- 3
+beta <- seq(-5, 7.4, 0.01)
+ridge <- (y - beta)^2 + lambda * beta^2 ## Ecuación (6.12)
+
+```
+
+
+(6.14)
+
+$$\hat{\beta}_j^R = y_j/(1+\lambda)$$
+```{r}
+beta.est <- y / (1 + lambda) ## Ecuación (6.14)
+rigde.est <- (y - beta.est)^2 + lambda * beta.est^2
+```
+
+
+```{r}
+
+plot(beta, ridge, type="l", xlab = "β", ylab = "Estimador Ridge", col = "blue", main = "Optimización Rigde")
+points(beta.est, rigde.est , col = "red", pch = 4, lwd = 5)
+
+```
+
+
+
+
+(b) Consider (6.13) with p = 1. For some choice of y1 and λ > 0,
+plot (6.13) as a function of β1. Your plot should confirm that
+(6.13) is solved by (6.15).
+
+
+
+(6.13)
+
+$$\sum_{i=1}^{p}\left ( y_j - \beta_j \right )^2 + \lambda\sum_{j=1}^{p}\left |\beta_j \right |$$
+
+```{r}
+y <- 5
+lambda <- 3
+beta <- seq(-5, 13.5, 0.01)
+lasso <- (y - beta)^2 + lambda * abs(beta) ## Ecuación (6.13)
+```
+
+(6.15)
+
+$$\hat{\beta}_j^L = \left\{\begin{matrix}
+y_j - \lambda/2 & if & y_j >  \lambda/2;\\ 
+y_j + \lambda/2  & if & y_j <  -\lambda/2;\\ \\ 
+0 & if & \left | y_j \right | \leq  \lambda/2.\\
+\end{matrix}\right.$$
+
+
+```{r}
+beta.est <- y - lambda/2 
+lasso.est <- (y - beta.est)^2 + lambda * abs(beta.est)
+```
+
+```{r}
+plot(beta, lasso, type="l", xlab = "β", ylab = "Estimador LASSO",main = "Optimización LASSO ", col="blue")
+points(beta.est, lasso.est , col = "red", pch = 4, lwd = 5)
+```
+
+
+

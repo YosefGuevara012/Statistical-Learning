@@ -1,0 +1,280 @@
+---
+output: word_document
+---
+
+8. In this exercise, we will generate simulated data, and will then use
+this data to perform best subset selection.
+
+(a) Use the rnorm() function to generate a predictor X of length
+n = 100, as well as a noise vector of length n = 100.
+
+```{r}
+library(leaps)
+```
+
+```{r}
+
+set.seed(123)
+x <- rnorm(100)
+epsilon <- rnorm(100)
+
+```
+
+(b) Generate a response vector Y of length n = 100 according to
+the model
+
+$$Y = \beta_0 + \beta_1X + \beta_2X^2 + \beta_3X^3 + \varepsilon,$$
+
+where β0, β1, β2, and β3 are constants of your choice.
+
+```{r}
+#Se definen los beta
+B0 <- 2
+B1 <- 4
+B2 <- 6
+B3 <- 8
+```
+
+
+```{r}
+# Calculando y
+y <- B0 + B1*x +B2*x^2 +B3*x^3 + epsilon
+head(y)
+```
+
+
+(c) Use the regsubsets() function to perform best subset selection
+in order to choose the best model containing the predictors
+$X,X_2, . . .,X_{10}$. What is the best model obtained according to
+$Cp$, $BIC$, and adjusted $R^2$? Show some plots to provide evidence
+for your answer, and report the coefficients of the best model obtained.
+Note you will need to use the data.frame() function to
+create a single data set containing both X and Y .
+
+```{r}
+regfit.full <- regsubsets(y~poly(x,10,raw=T), data=data.frame(y,x), nvmax=10)
+reg.summary <- summary(regfit.full)
+```
+
+```{r}
+par(mfrow=c(1,3))
+
+#Cp
+min.cp <- which.min(reg.summary$cp)  
+plot(reg.summary$cp, xlab="Numero de variables", ylab="Cp", type="l")
+points(min.cp, reg.summary$cp[min.cp], col="red", pch=4, lwd=5)
+
+#BIC
+min.bic <- which.min(reg.summary$bic)  
+plot(reg.summary$bic, xlab="Numero de variables", ylab="BIC", type="l")
+points(min.bic, reg.summary$bic[min.bic], col="red", pch=4, lwd=5)
+
+#R^2 ajustado
+max.adjr2 <- which.max(reg.summary$adjr2)  
+plot(reg.summary$adjr2, xlab="Numero de variables", ylab="R^2 ajustado", type="l")
+points(max.adjr2, reg.summary$adjr2[max.adjr2], col="red", pch=4, lwd=5)
+
+
+```
+Vemos que los criterios $Cp$ y $BIC$ seleccionan el modelo con 3 variables, mientras que el $R^2$ ajustado selecciona el modelo con 7 variables.
+
+Según el **Cp** y el **BIC** los coeficientes para las variables son.
+
+```{r}
+coef(regfit.full, id = 3 )
+```
+
+Según el **R^2** ajustado los coeficientes para las variables son.
+
+```{r}
+
+coef(regfit.full, id=7)
+```
+
+
+(d) Repeat (c), using forward stepwise selection and also using backwards
+stepwise selection. How does your answer compare to the
+results in (c)?
+
+```{r}
+# forward stepwise
+regfit.fwd <- regsubsets(y~poly(x,10,raw=T), data=data.frame(y,x), nvmax=10)
+fwd.summary <- summary(regfit.fwd)
+```
+
+
+```{r}
+# backward stepwise
+regfit.bwd <- regsubsets(y~poly(x,10,raw=T), data=data.frame(y,x), nvmax=10)
+bwd.summary <- summary(regfit.bwd)
+```
+
+Seleccion mediante criterio $Cp$ para backward y forward
+
+```{r}
+
+cpb <- which.min(bwd.summary$cp)
+cpf <- which.min(fwd.summary$cp)
+
+cat("Número de variables según Cp:\n")
+cat("bwd\t","fwd\n")
+cat(cpb,"\t",cpf)
+```
+Seleccion mediante criterio $BIC$ para backward y forward
+
+```{r}
+
+bpb <- which.min(bwd.summary$bic)
+bpf <- which.min(fwd.summary$bic)
+
+cat("Número de variables según BIC:\n")
+cat("bwd\t","fwd\n")
+cat(bpb,"\t",bpf)
+```
+
+Seleccion mediante criterio $R^2$ ajustado para backward y forward
+
+```{r}
+
+rpb <- which.max(bwd.summary$adjr2)
+rpf <- which.max(fwd.summary$adjr2)
+
+cat("Número de variables según R2 ajustado:\n")
+cat("bwd\t","fwd\n")
+cat(rpb,"\t",rpf)
+```
+
+```{r}
+par(mfrow=c(3,2))
+
+#Cp forward
+plot(fwd.summary$cp, xlab="Numero de variables", ylab="Cp", type="l", main="Cp Forward stepwise")
+points(cpf, fwd.summary$cp[cpf], col="red", pch=4, lwd=5)
+
+#Cp backward
+plot(bwd.summary$cp, xlab="Numero de variables", ylab="Cp", type="l", main="Cp Backward stepwise")
+points(cpb, bwd.summary$cp[cpb], col="red", pch=4, lwd=5)
+
+#BIC forward
+plot(fwd.summary$bic, xlab="Numero de variables", ylab="BIC", type="l", main="BIC Forward stepwise")
+points(bpf, fwd.summary$bic[bpf], col="red", pch=4, lwd=5)
+
+#BIC backward
+plot(bwd.summary$bic, xlab="Numero de variables", ylab="BIC", type="l", main="BIC Backward stepwise")
+points(bpb, bwd.summary$bic[bpb], col="red", pch=4, lwd=5)
+
+#R2 adjus forward
+plot(fwd.summary$adjr2, xlab="Numero de variables", ylab="R2 adjus.", type="l", main="R2 adjus. Forward stepwise")
+points(rpf, fwd.summary$adjr2[rpf], col="red", pch=4, lwd=5)
+
+#R2 adjus backward
+plot(bwd.summary$adjr2, xlab="Numero de variables", ylab="R2 adjus.", type="l", main="R2 adjus. Backward stepwise")
+points(rpb, bwd.summary$adjr2[rpb], col="red", pch=4, lwd=5)
+
+
+```
+Según el **CP** y el **BIC** mediante el **forward stepwise** los coeficientes son:
+
+```{r}
+coefficients(regfit.fwd, 3)
+```
+Según el **CP** y el **BIC** mediante el **backward stepwise** los coeficientes son:
+
+```{r}
+coefficients(regfit.bwd, 3)
+```
+
+Según el $R^2$ ajustado mediante el **backward stepwise** y el **forward stepwise**los coeficientes son:
+
+
+```{r}
+coefficients(regfit.bwd, 7)
+```
+
+
+(e) Now fit a lasso model to the simulated data, again using $X,X_2,. . . , X_{10}$ as predictors. Use cross-validation to select the optimal
+value of $\lambda$. Create plots of the cross-validation error as a function
+of $\lambda$. Report the resulting coefficient estimates, and discuss the
+results obtained.
+
+
+```{r}
+library(glmnet)
+```
+
+
+```{r}
+xmat = model.matrix(y ~ poly(x, 10, raw = T), data =data.frame(y,x))[, -1]
+mod.lasso = cv.glmnet(xmat, y, alpha = 1)
+
+```
+```{r}
+plot(mod.lasso)
+```
+El mejor $\lambda$ para nuestro modelo es:
+
+```{r}
+best.lambda = mod.lasso$lambda.min
+best.lambda
+```
+
+Se ajusta el modelo para todos los datos usando el mejor $\lambda$.
+
+```{r}
+best.model = glmnet(xmat, y, alpha = 1)
+predict(best.model, s = best.lambda, type = "coefficients")
+```
+El metodo **LASSO** selecciona las variables $X,X^2,X^3,X^4$ para nuestro modelo.
+
+
+(f) Now generate a response vector Y according to the model
+$y= \beta_0+\beta_7X^7\varepsilon$,
+and perform best subset selection and the lasso. Discuss the
+results obtained.
+
+
+```{r}
+B7 = 10
+y = B0 + B7 * x^7 + epsilon
+
+mod.full = regsubsets(y ~ poly(x, 10, raw = T), data = data.frame(y,x), nvmax = 10)
+mod.summary = summary(mod.full)
+
+CP <- which.min(mod.summary$cp)
+BIC <- which.min(mod.summary$bic)
+R2a <- which.max(mod.summary$adjr2)
+
+```
+
+
+
+```{r}
+cat("CP\t", "BIC\t", "R2 Adjust\n")
+cat(CP,"\t", BIC,"\t", R2a)
+```
+Tanto el CP como el BIC seleccionan el modelo con menos una variable
+
+```{r}
+coefficients(mod.full, id = 1)
+```
+
+Generando el modelo **LASSO**.
+
+```{r}
+xmat = model.matrix(y ~ poly(x, 10, raw = T), data = data.frame(y,x))[, -1]
+mod.lasso = cv.glmnet(xmat, y, alpha = 1)
+
+```
+
+Cuyo mejor $lambda$ es:
+```{r}
+best.lambda = mod.lasso$lambda.min
+best.lambda
+```
+
+
+```{r}
+best.model = glmnet(xmat, y, alpha = 1)
+predict(best.model, s = best.lambda, type = "coefficients")
+```
+Se evidencia que tambien se selecciona el modelo con 1-variable siendo esta $\beta_7$
