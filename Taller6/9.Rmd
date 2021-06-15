@@ -1,0 +1,115 @@
+---
+output: word_document 
+---
+
+
+9. In this exercise, we will predict the number of applications received using the other variables in the College data set.
+
+```{r, warning=FALSE, message=FALSE}
+library(ggplot2)
+library(dplyr)
+library(ISLR)
+library(corrplot)
+library(RColorBrewer)
+library(car)
+library(class)
+library(MASS)
+library(boot)
+library(glmnet)
+library(pls)
+```
+
+
+(a) Split the data set into a training set and a test set.
+
+```{r}
+#rm(list = ls())
+data(College)
+set.seed(1)
+trainid <- sample(1:nrow(College), nrow(College)/2)
+train <- College[trainid,]
+test <- College[-trainid,]
+str(College)
+```
+Se realiza la división entre el conjunto de datos de entrenamiento y de prueba tomando la mitad de la base de datos para cada uno de dischos conjuntos.
+
+
+(b) Fit a linear model using least squares on the training set, and
+report the test error obtained.
+
+```{r}
+mod.lm <- lm(Apps~., data=train)
+pred.lm <- predict(mod.lm, test)
+err.lm <- mean((test$Apps - pred.lm)^2)
+err.lm
+```
+El error de prueba MSE es 1135758
+
+
+(c) Fit a ridge regression model on the training set, with λ chosen by cross-validation. Report the test error obtained.
+
+```{r, warning=FALSE, message=FALSE}
+xmat.train <- model.matrix(Apps~., data=train)[,-1]
+xmat.test <- model.matrix(Apps~., data=test)[,-1]
+mod.ridge <- cv.glmnet(xmat.train, train$Apps, alpha=0)
+lambda <- mod.ridge$lambda.min
+pred.ridge <- predict(mod.ridge, s=lambda, newx=xmat.test)
+err.ridge <- mean((test$Apps - pred.ridge)^2)
+err.ridge
+```
+La prueba MSE es menor para la 'Ridge' regresión que para mínimos cuadrados.
+
+
+(d) Fit a lasso model on the training set, with λ chosen by crossvalidation. Report the test error obtained, along with the number of non-zero coefficient estimates.
+
+```{r}
+require(glmnet)
+xmat.train <- model.matrix(Apps~., data=train)[,-1]
+xmat.test <- model.matrix(Apps~., data=test)[,-1]
+mod.lasso <- cv.glmnet(xmat.train, train$Apps, alpha=1)
+lambda <- mod.lasso$lambda.min
+pred.lasso <- predict(mod.lasso, s=lambda, newx=xmat.test)
+err.lasso <- mean((test$Apps - pred.lasso)^2)
+coef.lasso <- predict(mod.lasso, type="coefficients", s=lambda)[1:ncol(College),]
+coef.lasso[coef.lasso != 0]
+length(coef.lasso[coef.lasso != 0])
+```
+Esto son los coeficientes obtenidos del modelo Lasso distinto de cero.
+
+(e) Fit a PCR model on the training set, with M chosen by crossvalidation. Report the test error obtained, along with the value of M selected by cross-validation.
+
+
+```{r}
+set.seed(1)
+mod.pcr <- pcr(Apps~., data=train, scale=TRUE, validation="CV")
+validationplot(mod.pcr, val.type="MSEP")
+summary(mod.pcr)
+pred.pcr <- predict(mod.pcr, test, ncomp=16)
+err.pcr <- mean((test$Apps - pred.pcr)^2)
+err.pcr
+```
+En este caso el error si es ligeramente mayor que para MSE, a diferencia de Lasso donde fue menor.
+
+
+(f) Fit a PLS model on the training set, with M chosen by crossvalidation. Report the test error obtained, along with the value of M selected by cross-validation.
+
+```{r}
+set.seed(1)
+mod.pls <- plsr(Apps~., data=train, scale=TRUE, validation="CV")
+validationplot(mod.pls, val.type="MSEP")
+summary(mod.pls)
+pred.pls <- predict(mod.pls, test, ncomp=10)
+err.pls <- mean((test$Apps - pred.pls)^2)
+err.pls
+```
+
+(g) Comment on the results obtained. How accurately can we predict the number of college applications received? Is there much difference among the test errors resulting from these five approaches?
+
+```{r}
+err.all <- c(err.lm, err.ridge, err.lasso, err.pcr, err.pls)
+names(err.all) <- c("lm", "ridge", "lasso", "pcr", "pls")
+barplot(err.all, col = brewer.pal(5, "Set3"))
+```
+
+Como se puede observar la diferncias no son evidentes salvo, en el modelo 'ridge', que evidentemente resulta ser el que menos error presenta. El segundo modelo con menor error es Lasso, mientras que PCR y PLS no son muy convenientes en eeste caso al tener errores relativamente altos con respecto a los otros modelos.
+

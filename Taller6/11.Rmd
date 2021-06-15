@@ -1,0 +1,96 @@
+---
+output: word_document
+---
+
+
+
+11. We will now try to predict per capita crime rate in the Boston data set.
+
+```{r, warning=FALSE, message=FALSE}
+library(ggplot2)
+library(dplyr)
+library(ISLR)
+library(corrplot)
+library(RColorBrewer)
+library(car)
+library(class)
+library(MASS)
+library(boot)
+library(glmnet)
+library(pls)
+library(leaps)
+```
+
+
+(a) Try out some of the regression methods explored in this chapter, such as best subset selection, the lasso, ridge regression, and PCR. Present and discuss results for the approaches that you consider.
+
+```{r}
+data(Boston)
+set.seed(1)
+
+predict.regsubsets <- function(object, newdata, id, ...) {
+    form <- as.formula(object$call[[2]])
+    mat <- model.matrix(form, newdata)
+    coefi <- coef(object, id = id)
+    xvars <- names(coefi)
+    mat[, xvars] %*% coefi
+}
+
+k = 10
+folds <- sample(1:k, nrow(Boston), replace = TRUE)
+cv.errors <- matrix(NA, k, 13, dimnames = list(NULL, paste(1:13)))
+for (j in 1:k) {
+    best.fit <- regsubsets(crim ~ ., data = Boston[folds != j, ], nvmax = 13)
+    for (i in 1:13) {
+        pred <- predict(best.fit, Boston[folds == j, ], id = i)
+        cv.errors[j, i] <- mean((Boston$crim[folds == j] - pred)^2)
+    }
+}
+mean.cv.errors <- apply(cv.errors, 2, mean)
+mean.cv.errors
+plot(mean.cv.errors, type = "b", xlab = "Variables", ylab = "Error de Validación cruzada")
+```
+El menor error para la validación cruzada es encuentra tomando 12 variables y tiene un valor de 42.46014. Pasamo a analizar Lasso.
+
+```{r}
+x <- model.matrix(crim ~ ., Boston)[, -1]
+y <- Boston$crim
+cv.out <- cv.glmnet(x, y, alpha = 1, type.measure = "mse")
+cv.out
+plot(cv.out)
+```
+El Lambda seleccionado es igual a 0.051 para un error de validación cruzada igual a 43.11. Pero solo se están considerando 11 variables, una reducción importante. Ahora veremos que sucede con la regresión 'ridge'. 
+
+```{r}
+cv.out <- cv.glmnet(x, y, alpha = 0, type.measure = "mse")
+cv.out
+plot(cv.out)
+```
+En este caso se obtiene un error para la validación cruada de 42.61 para un lambda igual a 0.54.
+
+```{r}
+pcr.mod <- pcr(crim ~ ., data = Boston, scale = TRUE, validation = "CV")
+pcr.mod
+summary(pcr.mod)
+validationplot(pcr.mod, val.type = "MSEP")
+```
+La validación cruzada selecciona 13 variables para un error de 45.4.
+
+
+
+(b) Propose a model (or set of models) that seem to perform well on this data set, and justify your answer. Make sure that you are evaluating model performance using validation set error, crossvalidation, or some other reasonable alternative, as opposed to using training error.
+
+
+Vemos entonces que el menor error de todos los presentados fue la primera (selección de subconjuntos), con un valor de 42.46, sin embargo todas se encuentran muy cercanos a este valor. COmo lo vemos en la siguiente gráfica.
+
+```{r}
+err.all_f <- c(42.46, 43.11, 42.61, 45.40)
+names(err.all_f) <- c("lm", "Lasso", "Ridge", "pcr")
+barplot(err.all_f, col = brewer.pal(5, "Set3"))
+```
+
+A pesar que en la selección de subconjuntos se tienen un error más bajo, es en el modelo Lasso donde se presenta una mayor reducción de variables, haciendo el modelo más sencillo y facil de interpretar y el error solamente incrementa 0.65. Por este motivo el modelo Lasso puede ser más conveniente.
+
+(c) Does your chosen model involve all of the features in the data set? Why or why not?
+
+El modelo Lasso solamnte consideró 11 variables.Los que fueron excluidos no resultaron significativos dentro del modelo.
