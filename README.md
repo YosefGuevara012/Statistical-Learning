@@ -9,29 +9,29 @@ This repository contains all the workshops developed for the statistical learnin
 
 ## What I learned
 
-- Development and improvement of autonomous learning skills
+1. Development and improvement of autonomous learning skills
 
-- Differences and similarities between SL and ML. 
+2. Differences and similarities between SL and ML. 
 
-- Fundamentals of Statistical Learning.
+3. Fundamentals of Statistical Learning.
 
-- Implementation and development of simple and multiple linear regression models.
+4. Implementation and development of simple and multiple linear regression models.
 
-- Implementation of classification models such as:
+5. Implementation of classification models such as:
 
   - Logistic Regression.
   - LDA (Linear Discriminant Analysis).
   - QDA (Quadratrict Discriminant Analysis).
   - KNN (K-Nearest Neigbors).
 
-- Resampling methods such as:
+6. Resampling methods such as:
 
  - Validation approach
  - Boostrap
  - LOOCV
  - K-Fold Cross-Validation
 
-- Linear Model Selection and Regularization
+7. Linear Model Selection and Regularization
 
  - Subset Selection
    - Stepwise
