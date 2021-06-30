@@ -1,26 +1,41 @@
-# Applied regression methods
+# Statistical learning class (Topicos Avanzados de estadistica)
 
-This Git is part of the class of applied regression methods, examples, exercises, etc.
+This Git is part of the class of Statistical learning class imparted by the Colombian national university based on the book An Introduction to Statistical Learning with Applications in R.
 
 ## Description
 
-This repository contains a large part of the exercises developed in a R Notebook. Among the exercises we find correlation exercises, Simple Linear Regression (RLS), Multiple Linear Regression (RLM), Generalized Linear Models (GLM), corresponding to the books of Daalgard (Introductory Statistics in R), and (A modern approach to regression in R) Sheater.
+This repository contains all the workshops developed for the statistical learning class.
+
 
 ## What I learned
 
-- Modeling of phenomena using Simple linear regression.
+- Development and improvement of autonomous learning skills
 
-- Modeling of phenomena using multiple linear regression.
+- Differences and similarities between SL and ML. 
 
-  - R ^ 2
-  - AIC and BIC
-  - Press
+- Fundamentals of Statistical Learning.
 
-- Modeling phenomena generalized linear models.
-  - GLM (Binomial = ["Logit", "probit"]
-  - GLM (Poisson)
+- Implementation and development of simple and multiple linear regression models.
 
-- identification of significant variables.
-- Identification of coefficients.
-- Creation of confidence intervals.
-- Validation of assumptions of the different linear models
+- Implementation of classification models such as:
+
+  - Logistic Regression.
+  - LDA (Linear Discriminant Analysis).
+  - QDA (Quadratrict Discriminant Analysis).
+  - KNN (K-Nearest Neigbors).
+
+- Resampling methods such as:
+
+ - Validation approach
+ - Boostrap
+ - LOOCV
+ - K-Fold Cross-Validation
+
+- Linear Model Selection and Regularization
+
+ - Subset Selection
+   - Stepwise
+ - Shrinkage Methods
+ - The Lasso
+ - Selecting the Tuning Parameter
+ - Dimension Reduction Methods
