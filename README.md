@@ -19,23 +19,23 @@ This repository contains all the workshops developed for the statistical learnin
 
 5. Implementation of classification models such as:
 
-  - Logistic Regression.
-  - LDA (Linear Discriminant Analysis).
-  - QDA (Quadratrict Discriminant Analysis).
-  - KNN (K-Nearest Neigbors).
+    - Logistic Regression.
+    - LDA (Linear Discriminant Analysis).
+    - QDA (Quadratrict Discriminant Analysis).
+    - KNN (K-Nearest Neigbors).
 
 6. Resampling methods such as:
 
- - Validation approach
- - Boostrap
- - LOOCV
- - K-Fold Cross-Validation
+   - Validation approach
+   - Boostrap
+   - LOOCV
+   - K-Fold Cross-Validation
 
 7. Linear Model Selection and Regularization
 
- - Subset Selection
-   - Stepwise
- - Shrinkage Methods
- - The Lasso
- - Selecting the Tuning Parameter
- - Dimension Reduction Methods
+   - Subset Selection
+     - Stepwise
+   - Shrinkage Methods
+   - The Lasso
+   - Selecting the Tuning Parameter
+   - Dimension Reduction Methods
